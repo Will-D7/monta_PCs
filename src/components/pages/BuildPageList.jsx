@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity } from 'react-native';
 import NavigationBar from '../NavigationBar';
-import {componentsData } from '../componentesData/componentsData';
+import {componentsData } from '../dataComponents/componentsData';
 import { useNavigation } from '@react-navigation/native';
 
 const BuildPageList = ({ route }) => {
