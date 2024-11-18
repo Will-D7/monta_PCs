@@ -1,38 +1,27 @@
-import React from "react";
-import { NavigationContainer } from "@react-navigation/native";
-import { createStackNavigator } from "@react-navigation/stack";
-import { enableScreens } from "react-native-screens";
-import { StyleSheet, View } from "react-native";
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import { enableScreens } from 'react-native-screens';
+import { View, StyleSheet } from 'react-native';
 
-// Importa Firebase
-import app from "./src/firebase/config";
+import SearchBar from './componentes/SearchBar';
+import Categories from './componentes/Categories';
+import ContentSection from './componentes/ContentSection';
+import NavigationBar from './componentes/NavigationBar';
+import BuildPage from './componentes/pages/BuildPage';
+import BuildPageList from './componentes/pages/BuildPageList';
 
-// Importa los componentes y páginas
-import SearchBar from "./src/components/SearchBar";
-import Categories from "./src/components/Categories";
-import ContentSection from "./src/components/ContentSection";
-import NavigationBar from "./src/components/NavigationBar";
-import BuildPage from "./src/components/pages/BuildPage";
-import BuildPageList from "./src/components/pages/BuildPageList";
+// Importaciones nuevas
+import LoginScreen from './src/screens/LoginScreen';
+import RegisterScreen from './src/screens/RegisterScreen';
+import HomeScreen from './src/screens/HomeScreen';
 
-// Habilita pantallas nativas para mejorar el rendimiento
+// Habilitar pantallas nativas
 enableScreens();
 
-// Configuración del stack navigator
 const Stack = createStackNavigator();
 
-// Datos de ejemplo para los productos
-const enOfertaProducts = [
-  { title: "ASUS ROG Strix B760-I Gaming WiFi", price: "450 Bs." },
-  { title: "ASUS ROG Maximus Z790 HERO", price: "500 Bs." },
-];
-
-const nuevoProducts = [
-  { title: "MSI MPG B550 Gaming Plus", price: "E-ATX" },
-];
-
-// Pantalla principal (HomeScreen) que muestra los componentes
-const HomeScreen = () => {
+const HomePage = () => {
   return (
     <View style={styles.container}>
       <SearchBar />
@@ -44,14 +33,26 @@ const HomeScreen = () => {
   );
 };
 
-// Componente principal de la app con el stack navigator
-const App = () => {
-  console.log("Firebase App initialized: ", app);
+const enOfertaProducts = [
+  { title: 'ASUS ROG Strix B760-I Gaming WiFi', price: '450 Bs.' },
+  { title: 'ASUS ROG Maximus Z790 HERO', price: '500 Bs.' },
+];
 
+const nuevoProducts = [
+  { title: 'MSI MPG B550 Gaming Plus', price: 'E-ATX' },
+];
+
+const App = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="Login">
+        {/* Rutas de login y registro */}
+        <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="Register" component={RegisterScreen} />
+
+        {/* Ruta para Home y demás vistas */}
         <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="HomePage" component={HomePage} />
         <Stack.Screen name="BuildPage" component={BuildPage} />
         <Stack.Screen name="BuildPageList" component={BuildPageList} />
       </Stack.Navigator>
@@ -62,7 +63,7 @@ const App = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#eee",
+    backgroundColor: '#eee',
   },
 });
 

@@ -9,6 +9,15 @@ npm install @react-navigation/stack
 npm install @react-native-picker/picker
 
 
+
+
 INICIAR PROYECTO
 npm start  o npx expo start (de forma remota)
 npx expo start --android (via adb...)
+
+
+### Más Dependencias
+```
+npm install react-native-safe-area-context
+```bash
+### A considerar: tsconfig.json se me instaló y casi todo automáticamente, pero si te sale error sólo instalas lo que falta
