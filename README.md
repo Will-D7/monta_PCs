@@ -20,4 +20,6 @@ npx expo start --android (via adb...)
 ```
 npm install react-native-safe-area-context
 ```bash
-### A considerar: tsconfig.json se me instaló y casi todo automáticamente, pero si te sale error sólo instalas lo que falta
+### A considerar: 
+- tsconfig.json se me instaló y casi todo automáticamente, pero si te sale error sólo instalas lo que falta
+- Si te sale un error de que no reconoce un import, sólo reinicia el expo
