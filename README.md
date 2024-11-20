@@ -1,13 +1,25 @@
 
-INSTALAR DEPENDENCIAS/UTILIDADES
+### INSTAlar DEPENDENCIAS
+```bash
 
 npm install -g expo-cli
-npm install firebase (equivalente a "yarn add firebase")
+
 npm install @react-navigation/native && yarn add @react-navigation/stack && expo install react-native-gesture-handler react-native-reanimated react-native-screens react-native-safe-area-context @react-native-community/masked-view	(Agregar la librería de Navegación de React Native Navigation ejecutando)
 npm install react-native-keyboard-aware-scroll-view base-64	(Agregar varios componentes UI y paquetes a ser usados en el proyecto)
 npm install @react-navigation/stack
 npm install @react-native-picker/picker
 
+npm uninstall @react-native-firebase/app @react-native-firebase/auth @react-native-firebase/firestore
+npm install @supabase/supabase-js
+
+npm install -g yarn (yarn para algunas dependencias actualizadas no compatibles, anteriores o posteriores)
+expo install expo-document-picker ( Con lo de arriba)
+npx expo install react-native-gesture-handler
+
+```
+###
+- Se desintala todo lo relacionada a firebase, para ser sustituido por supabase
+- txt...
 
 
 

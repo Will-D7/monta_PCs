@@ -4,6 +4,9 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { enableScreens } from 'react-native-screens';
 import { View, StyleSheet } from 'react-native';
 
+//supabase
+import { uploadImages, saveComponentToDB } from './src/services/uploadService';
+
 import SearchBar from './componentes/SearchBar';
 import Categories from './componentes/Categories';
 import ContentSection from './componentes/ContentSection';
@@ -11,10 +14,16 @@ import NavigationBar from './componentes/NavigationBar';
 import BuildPage from './componentes/pages/BuildPage';
 import BuildPageList from './componentes/pages/BuildPageList';
 
+
 // Importaciones nuevas
 import LoginScreen from './src/screens/LoginScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
 import HomeScreen from './src/screens/HomeScreen';
+
+
+//componente para crear nuevos componentes xD
+import NewComponentForm from './componentes/NewComponentForm';
+
 
 // Habilitar pantallas nativas
 enableScreens();
@@ -55,6 +64,10 @@ const App = () => {
         <Stack.Screen name="HomePage" component={HomePage} />
         <Stack.Screen name="BuildPage" component={BuildPage} />
         <Stack.Screen name="BuildPageList" component={BuildPageList} />
+
+        {/*Ruta formulario creacion de componentes*/}
+        <Stack.Screen name = "NewComponentForm" component={NewComponentForm}/>
+
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -66,5 +79,26 @@ const styles = StyleSheet.create({
     backgroundColor: '#eee',
   },
 });
+
+async function handleFormSubmit(event){
+  event.preventDefault();
+  const componentData = {
+    name: formData.name,
+    price: formData.price,
+    description: formData.description,
+    imgURLs: [],
+  };
+  try {
+    const imgURLs = await uploadImages(formData.files);
+    componentData.imgURLs = imgURLs;
+
+    const saveComponent = await saveComponentToDB(componentData);
+    console.log('Componente Guardado: ',saveComponent);
+
+  }catch(error){
+    console.error('Error al manejar el formulario: ', error.message);
+  }
+}
+
 
 export default App;
