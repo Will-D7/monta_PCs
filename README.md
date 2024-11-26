@@ -16,6 +16,9 @@ npm install -g yarn (yarn para algunas dependencias actualizadas no compatibles,
 expo install expo-document-picker ( Con lo de arriba)
 npx expo install react-native-gesture-handler
 
+npm install react-native-dotenv ( importante para el .env)
+
+
 ```
 ###
 - Se desintala todo lo relacionada a firebase, para ser sustituido por supabase

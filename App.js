@@ -14,6 +14,8 @@ import NavigationBar from './componentes/NavigationBar';
 import BuildPage from './componentes/pages/BuildPage';
 import BuildPageList from './componentes/pages/BuildPageList';
 
+import UserPage from './componentes/pages/UserPage';
+
 
 // Importaciones nuevas
 import LoginScreen from './src/screens/LoginScreen';
@@ -65,6 +67,8 @@ const App = () => {
         <Stack.Screen name="BuildPage" component={BuildPage} />
         <Stack.Screen name="BuildPageList" component={BuildPageList} />
 
+        <Stack.Screen name = "UserPage" component={UserPage} />
+        
         {/*Ruta formulario creacion de componentes*/}
         <Stack.Screen name = "NewComponentForm" component={NewComponentForm}/>
 
