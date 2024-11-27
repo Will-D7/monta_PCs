@@ -1,19 +1,16 @@
 import React from "react";
 import { View, Text, Button, StyleSheet } from "react-native";
-import { Picker } from '@react-native-picker/picker';
 import NavigationBar from '../NavigationBar';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 
 const UserPage = ({route}) => {
     const navigation = useNavigation();
     return (
         <View style={styles.container}>
             {/* Logo y barra de búsqueda */}
-            <View style={styles.header}>
-                <Image source={require('../../images/logo.png')} style={styles.logo} />
-                <TextInput placeholder="Buscar componente, build o distribuidores" style={styles.searchInput} />
-                <Image source={require('../../images/usuario.png')} style={styles.userIcon} />
-            </View>
+            
+
+            
             <Text style={styles.title}>Perfil de Usuario</Text>
             <Button
                     title="Añadir Nuevo Componente"
