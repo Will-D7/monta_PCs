@@ -1,16 +1,42 @@
-import React from 'react';
-import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect} from 'react';
+import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
 import NavigationBar from '../NavigationBar';
-import {componentsData } from '../componentesData/componentsData';
+import { supabase } from '../../src/services/supabaseClient';
 import { useNavigation } from '@react-navigation/native';
 
 const BuildPageList = ({ route }) => {
   const { categoryTitle } = route?.params || {};
   const navigation = useNavigation();
+  const [components, setComponents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  // Obtener componentes desde supabase
+  const fetchComponents = async () => {
+    try{
+      setLoading(true);
+      const {data, error} = await supabase
+      .from('components')
+      .select('*')
+      .eq('category',categoryTitle); //filtrar por categoria seleccionada
+      console.log("Category Title being used: ", categoryTitle);
+      
+      if(error) throw error;
+      setComponents(data || []);
 
-  const filteredComponents = componentsData.filter(
-    (component) => component.category === categoryTitle
-  );
+
+    }catch(error){
+      setError(err.message);
+    }finally{
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    
+    fetchComponents();
+  },[categoryTitle]);
+
 
   const handleAddComponent = (component) => {
     navigation.goBack(); // Regresar a BuildPage
@@ -19,7 +45,7 @@ const BuildPageList = ({ route }) => {
 
   const renderComponent = ({ item }) => (
     <View style={styles.componentContainer}>
-      <Image source={{ uri: item.image }} style={styles.image} />
+      <Image source={{ uri: item.imgURL[0] }} style={styles.image} /> {/* url de supabase*/}
       <View style={styles.infoContainer}>
         <Text style={styles.name}>{item.name}</Text>
         <Text style={styles.description}>{item.description}</Text>
@@ -34,16 +60,31 @@ const BuildPageList = ({ route }) => {
     </View>
   );
 
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#4a3b8f" />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.errorText}>Error: {error}</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
       <View style={styles.content}>
         <Text style={styles.title}>{String(categoryTitle)}</Text>
-      <FlatList
-        data={filteredComponents}
-        renderItem={renderComponent}
-        keyExtractor={(item) => item.id.toString()}
-      />
+        <FlatList
+          data={components}
+          renderItem={renderComponent}
+          keyExtractor={(item) => item.id.toString()}
+        />
       </View>
       <NavigationBar />
     </View>
@@ -55,11 +96,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f0f0f0',
   },
-  componentContainer: { flexDirection: 'row', padding: 10, backgroundColor: '#fff', marginVertical: 5 },
-  image: { width: 60, height: 60 },
-  infoContainer: { flex: 1, marginLeft: 10 },
-  addButton: { backgroundColor: '#4caf50', padding: 10, borderRadius: 5, marginTop: 5 },
-  addButtonText: { color: '#fff', textAlign: 'center' },
   content: {
     flex: 1,
     paddingTop: 20,
@@ -114,6 +150,11 @@ const styles = StyleSheet.create({
   addButtonText: {
     color: '#333',
     fontWeight: 'bold',
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 16,
+    textAlign: 'center',
   },
 });
 
