@@ -1,9 +1,26 @@
-import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ImageBackground } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ImageBackground, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { signUp } from '../services/authService'; // Asegúrate de importar la función signUp
 
 export default function RegisterScreen() {
+  const [email, setEmail] = useState(''); // Estado para el email
+  const [password, setPassword] = useState(''); // Estado para la contraseña
   const navigation = useNavigation();
+
+  const handleRegister = async () => {
+    // Llamamos a la función signUp de supabase
+    const user = await signUp(email, password);
+
+    if (user) {
+      // Si el registro fue exitoso, navega a la pantalla de login
+      navigation.navigate('Login');
+      Alert.alert("¡Registro exitoso!", "Ahora puedes iniciar sesión.");
+    } else {
+      // Si hubo un error, muestra el mensaje de error
+      Alert.alert("Error", "Hubo un problema con el registro.");
+    }
+  };
 
   return (
     <ImageBackground 
@@ -12,9 +29,20 @@ export default function RegisterScreen() {
     >
       <View style={styles.container}>
         <Text style={styles.title}>REGISTRARSE</Text>
-        <TextInput placeholder="Correo electrónico" style={styles.input} />
-        <TextInput placeholder="Contraseña" style={styles.input} secureTextEntry />
-        <TouchableOpacity style={styles.button}>
+        <TextInput 
+          placeholder="Correo electrónico" 
+          style={styles.input} 
+          value={email} 
+          onChangeText={setEmail} // Actualiza el estado del email
+        />
+        <TextInput 
+          placeholder="Contraseña" 
+          style={styles.input} 
+          secureTextEntry 
+          value={password} 
+          onChangeText={setPassword} // Actualiza el estado de la contraseña
+        />
+        <TouchableOpacity style={styles.button} onPress={handleRegister}>
           <Text style={styles.buttonText}>CREAR CUENTA</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('Login')}>
