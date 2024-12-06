@@ -1,24 +1,31 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ImageBackground, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { signUp } from '../services/authService'; // Asegúrate de importar la función signUp
+import { signUp } from '../services/authService'; // función signUp
+import { supabase } from '../services/supabaseClient';
 
 export default function RegisterScreen() {
   const [email, setEmail] = useState(''); // Estado para el email
   const [password, setPassword] = useState(''); // Estado para la contraseña
+  const [confirmPassword, setConfirmPassword] = useState('');
   const navigation = useNavigation();
+  const [isSubmitting, setIsSubmitting] = useState(false); //estado del boton, evitar errores de doble solicitud
 
   const handleRegister = async () => {
-    // Llamamos a la función signUp de supabase
-    const user = await signUp(email, password);
+    if(password !== confirmPassword){
+      Alert.alert('Error', 'Las contraseñas no coinciden.');
+      return;
+    }
 
-    if (user) {
-      // Si el registro fue exitoso, navega a la pantalla de login
-      navigation.navigate('Login');
-      Alert.alert("¡Registro exitoso!", "Ahora puedes iniciar sesión.");
-    } else {
-      // Si hubo un error, muestra el mensaje de error
-      Alert.alert("Error", "Hubo un problema con el registro.");
+    setIsSubmitting(true);
+    const { user, error } = await signUp(email, password); //servicio de registro
+    setIsSubmitting(false);
+
+    if(error){
+      Alert.alert('Error', error.message);
+    }else{
+      Alert.alert('Exito', 'Usuario registrado correctamente, puede Iniciar sesión');
+      navigation.navigate('Login'); //REDIRIGE A LOGIN
     }
   };
 
@@ -42,9 +49,25 @@ export default function RegisterScreen() {
           value={password} 
           onChangeText={setPassword} // Actualiza el estado de la contraseña
         />
-        <TouchableOpacity style={styles.button} onPress={handleRegister}>
-          <Text style={styles.buttonText}>CREAR CUENTA</Text>
+        
+        <TextInput  //Confirmar contraseña
+          placeholder="Confirmar Contraseña"
+          style={styles.input}
+          secureTextEntry
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+        />
+
+        <TouchableOpacity 
+          style={[styles.button, isSubmitting && styles.buttonDisabled]} 
+          onPress={handleRegister}
+          disabled={isSubmitting}
+          >
+            <Text style={styles.buttonText}>
+              {isSubmitting ? 'Registrando...': 'CREAR CUENTA'}
+            </Text>
         </TouchableOpacity>
+
         <TouchableOpacity onPress={() => navigation.navigate('Login')}>
           <Text style={styles.link}>¿Ya tienes cuenta? Iniciar sesión</Text>
         </TouchableOpacity>
