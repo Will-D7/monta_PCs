@@ -13,10 +13,6 @@ const BuildPageList = ({ route }) => {
   const [selectedComponent, setSelectedComponent] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
 
-  const handleImagePress = (component) => {
-    setSelectedComponent(component);
-    setModalVisible(true);
-  };
   
   
   const fetchComponents = async () => {
@@ -48,7 +44,6 @@ const BuildPageList = ({ route }) => {
   
 
   useEffect(() => {
-    
     fetchComponents();
   },[categoryTitle]);
 
@@ -64,6 +59,11 @@ const BuildPageList = ({ route }) => {
   };
   
 
+  const handleImagePress = (component) => {
+    setSelectedComponent(component);
+    setModalVisible(true);
+  };
+
   const renderComponent = ({ item }) => (
     <View style={styles.componentContainer}>
           <TouchableOpacity onPress={() => handleImagePress(item)}>
@@ -71,7 +71,6 @@ const BuildPageList = ({ route }) => {
         </TouchableOpacity>
       <View style={styles.infoContainer}>
         <Text style={styles.name}>{item.name}</Text>
-        <Text style={styles.description}>{item.description}</Text>
         <Text style={styles.price}>${item.price}</Text>
         <TouchableOpacity
           style={styles.addButton}
@@ -216,10 +215,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
-  description: {
-    fontSize: 14,
-    color: '#666',
-  },
   price: {
     fontSize: 16,
     fontWeight: 'bold',
@@ -239,6 +234,46 @@ const styles = StyleSheet.create({
   errorText: {
     color: 'red',
     fontSize: 16,
+    textAlign: 'center',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    width: '80%',
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 20,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalImage: {
+    width: 150,
+    height: 150,
+    borderRadius: 10,
+    marginBottom: 16,
+  },
+  modalName: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  modalPrice: {
+    fontSize: 18,
+    color: '#4a3b8f',
+    marginBottom: 8,
+  },
+  modalDescription: {
+    fontSize: 16,
+    color: '#666',
+    marginBottom: 16,
     textAlign: 'center',
   },
 });
