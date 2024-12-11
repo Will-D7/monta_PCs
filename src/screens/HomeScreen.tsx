@@ -12,7 +12,7 @@ export default function HomeScreen() {
     >
       <View style={styles.container}>
         <Text style={styles.title}>Bienvenido a PComponentes</Text>
-        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Login')}>
+        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('HomePage')}>
           <Text style={styles.buttonText}>Iniciar Sesión</Text>
         </TouchableOpacity>
       </View>

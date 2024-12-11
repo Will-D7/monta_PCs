@@ -44,3 +44,24 @@ export const signUp = async (username, email, password) => {
     return { error: { message: err.message } };
   }
 };
+
+
+//login
+
+export const signInWithEmail =async (email, password) => {
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if(error) throw error;
+
+    return data;
+
+  } catch (err){
+    console.error('Error al iniciar sesion: ', err.message);
+    throw err;
+  }
+};
+
