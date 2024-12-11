@@ -11,41 +11,55 @@ const BuildPageList = ({ route }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  // Obtener componentes desde supabase
+  
   const fetchComponents = async () => {
-    try{
+    try {
       setLoading(true);
-      const {data, error} = await supabase
-      .from('components')
-      .select('*')
-      .eq('category',categoryTitle); //filtrar por categoria seleccionada
-      console.log("Category Title being used: ", categoryTitle);
-      
-      if(error) throw error;
-      setComponents(data || []);
-
-
-    }catch(error){
+      const { data, error } = await supabase
+        .from('componente') 
+        .select('id_componente, nombre, descripcion, atributos, imagenurl, precio') // Seleccionamos los campos necesarios
+        .eq('tipo', categoryTitle); 
+  
+      if (error) throw error;
+  
+      // Mapeamos los datos para facilitar su uso en el renderizado
+      const formattedData = data.map((item) => ({
+        id: item.id_componente,
+        name: item.nombre,
+        description: item.descripcion,
+        price: item.precio,
+        imgURL: item.imagenurl,
+      }));
+  
+      setComponents(formattedData || []);
+    } catch (err) {
       setError(err.message);
-    }finally{
+    } finally {
       setLoading(false);
     }
   };
+  
 
   useEffect(() => {
     
     fetchComponents();
   },[categoryTitle]);
 
-
   const handleAddComponent = (component) => {
     navigation.goBack(); // Regresar a BuildPage
-    route.params?.onSelectComponent?.(component);
+    route.params?.onSelectComponent?.({
+      id: component.id, // id del componente
+      name: component.name, // nombre del componente
+      price: component.price, // precio del componente
+      description: component.description, // descripción
+      imgURL: component.imgURL, // URL de la imagen
+    });
   };
+  
 
   const renderComponent = ({ item }) => (
     <View style={styles.componentContainer}>
-      <Image source={{ uri: item.imgURL[0] }} style={styles.image} /> {/* url de supabase*/}
+      <Image source={{ uri: item.imgURL }} style={styles.image} />
       <View style={styles.infoContainer}>
         <Text style={styles.name}>{item.name}</Text>
         <Text style={styles.description}>{item.description}</Text>
@@ -59,6 +73,7 @@ const BuildPageList = ({ route }) => {
       </View>
     </View>
   );
+  
 
   if (loading) {
     return (
