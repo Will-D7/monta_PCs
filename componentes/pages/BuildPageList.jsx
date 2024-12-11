@@ -1,5 +1,5 @@
 import React, { useState, useEffect} from 'react';
-import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, ActivityIndicator, Modal, Button } from 'react-native';
 import NavigationBar from '../NavigationBar';
 import { supabase } from '../../src/services/supabaseClient';
 import { useNavigation } from '@react-navigation/native';
@@ -10,45 +10,67 @@ const BuildPageList = ({ route }) => {
   const [components, setComponents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedComponent, setSelectedComponent] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+
   
-  // Obtener componentes desde supabase
+  
   const fetchComponents = async () => {
-    try{
+    try {
       setLoading(true);
-      const {data, error} = await supabase
-      .from('components')
-      .select('*')
-      .eq('category',categoryTitle); //filtrar por categoria seleccionada
-      console.log("Category Title being used: ", categoryTitle);
-      
-      if(error) throw error;
-      setComponents(data || []);
-
-
-    }catch(error){
+      const { data, error } = await supabase
+        .from('componente') 
+        .select('id_componente, nombre, descripcion, atributos, imagenurl, precio') // Seleccionamos los campos necesarios
+        .eq('tipo', categoryTitle); 
+  
+      if (error) throw error;
+  
+      // Mapeamos los datos para facilitar su uso en el renderizado
+      const formattedData = data.map((item) => ({
+        id: item.id_componente,
+        name: item.nombre,
+        description: item.descripcion,
+        price: item.precio,
+        imgURL: item.imagenurl,
+      }));
+  
+      setComponents(formattedData || []);
+    } catch (err) {
       setError(err.message);
-    }finally{
+    } finally {
       setLoading(false);
     }
   };
+  
 
   useEffect(() => {
-    
     fetchComponents();
   },[categoryTitle]);
 
-
   const handleAddComponent = (component) => {
     navigation.goBack(); // Regresar a BuildPage
-    route.params?.onSelectComponent?.(component);
+    route.params?.onSelectComponent?.({
+      id: component.id, // id del componente
+      name: component.name, // nombre del componente
+      price: component.price, // precio del componente
+      description: component.description, // descripción
+      imgURL: component.imgURL, // URL de la imagen
+    });
+  };
+  
+
+  const handleImagePress = (component) => {
+    setSelectedComponent(component);
+    setModalVisible(true);
   };
 
   const renderComponent = ({ item }) => (
     <View style={styles.componentContainer}>
-      <Image source={{ uri: item.imgURL[0] }} style={styles.image} /> {/* url de supabase*/}
+          <TouchableOpacity onPress={() => handleImagePress(item)}>
+            <Image source={{ uri: item.imgURL }} style={styles.image} />
+        </TouchableOpacity>
       <View style={styles.infoContainer}>
         <Text style={styles.name}>{item.name}</Text>
-        <Text style={styles.description}>{item.description}</Text>
         <Text style={styles.price}>${item.price}</Text>
         <TouchableOpacity
           style={styles.addButton}
@@ -59,6 +81,7 @@ const BuildPageList = ({ route }) => {
       </View>
     </View>
   );
+  
 
   if (loading) {
     return (
@@ -86,6 +109,27 @@ const BuildPageList = ({ route }) => {
           keyExtractor={(item) => item.id.toString()}
         />
       </View>
+      <Modal
+  animationType="slide"
+  transparent={true}
+  visible={modalVisible}
+  onRequestClose={() => setModalVisible(false)}
+>
+  <View style={styles.modalContainer}>
+    <View style={styles.modalContent}>
+      {selectedComponent && (
+        <>
+          <Image source={{ uri: selectedComponent.imgURL }} style={styles.modalImage} />
+          <Text style={styles.modalName}>{selectedComponent.name}</Text>
+          <Text style={styles.modalPrice}>${selectedComponent.price}</Text>
+          <Text style={styles.modalDescription}>{selectedComponent.description}</Text>
+        </>
+      )}
+      <Button title="Cerrar" onPress={() => setModalVisible(false)} color="#6200EE" />
+    </View>
+  </View>
+</Modal>
+
       <NavigationBar />
     </View>
   );
@@ -96,6 +140,46 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f0f0f0',
   },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    width: '80%',
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 20,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalImage: {
+    width: 150,
+    height: 150,
+    borderRadius: 10,
+    marginBottom: 16,
+  },
+  modalName: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  modalPrice: {
+    fontSize: 18,
+    color: '#4a3b8f',
+    marginBottom: 8,
+  },
+  modalDescription: {
+    fontSize: 16,
+    color: '#666',
+    marginBottom: 16,
+    textAlign: 'center',
+  },  
   content: {
     flex: 1,
     paddingTop: 20,
@@ -131,10 +215,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
-  description: {
-    fontSize: 14,
-    color: '#666',
-  },
   price: {
     fontSize: 16,
     fontWeight: 'bold',
@@ -154,6 +234,46 @@ const styles = StyleSheet.create({
   errorText: {
     color: 'red',
     fontSize: 16,
+    textAlign: 'center',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    width: '80%',
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 20,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalImage: {
+    width: 150,
+    height: 150,
+    borderRadius: 10,
+    marginBottom: 16,
+  },
+  modalName: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  modalPrice: {
+    fontSize: 18,
+    color: '#4a3b8f',
+    marginBottom: 8,
+  },
+  modalDescription: {
+    fontSize: 16,
+    color: '#666',
+    marginBottom: 16,
     textAlign: 'center',
   },
 });

@@ -16,16 +16,13 @@ import BuildPageList from './componentes/pages/BuildPageList';
 
 import UserPage from './componentes/pages/UserPage';
 
-
 // Importaciones nuevas
 import LoginScreen from './src/screens/LoginScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
 import HomeScreen from './src/screens/HomeScreen';
 
-
 //componente para crear nuevos componentes xD
 import NewComponentForm from './componentes/NewComponentForm';
-
 
 // Habilitar pantallas nativas
 enableScreens();
@@ -103,6 +100,5 @@ async function handleFormSubmit(event){
     console.error('Error al manejar el formulario: ', error.message);
   }
 }
-
 
 export default App;
