@@ -1,16 +1,46 @@
-import { supabase } from './supabaseClient';
+import { supabase } from '../services/supabaseClient';
 
-export const signUp = async (email, password) => {
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-  });
+export const signUp = async (username, email, password) => {
+  try {
+    console.log('Registrando usuario...');
+    console.log('Correo:', email);
+    console.log('Contraseña:', password);
+    console.log('Nombre de Usuario:', username);
 
-  if (error) {
-    console.error('Error during sign-up: ', error.message);
-    return error.message; // Devuelve el error si ocurre uno
+    // Crear usuario en auth.users
+    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { name: username },
+      },
+    });
+
+    if (signUpError) {
+      console.error('Error al crear el usuario en auth.users:', signUpError.message);
+      return { error: signUpError };
+    }
+
+    console.log('Usuario creado en auth.users:', signUpData);
+
+    const userId = signUpData.user?.id; // ID del usuario
+    if (userId) {
+      // Insertar usuario en la tabla personalizada 'usuarios'
+      const { error: insertError } = await supabase
+        .from('usuarios')
+        .insert([{ user_id: userId, name: username, email: email }]);
+
+      if (insertError) {
+        console.error('Error al insertar en la tabla usuarios:', insertError.message);
+        return { error: insertError };
+      }
+
+      console.log('Datos insertados en la tabla usuarios.');
+    }
+
+    return { success: true };
+  } catch (err) {
+    console.error('Error general en el proceso de registro:', err.message);
+    return { error: { message: err.message } };
   }
-
-  console.log('User registered: ', data.user);
-  return data.user; // Devuelve el usuario registrado
 };
