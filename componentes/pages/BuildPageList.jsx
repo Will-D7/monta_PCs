@@ -13,14 +13,14 @@ const BuildPageList = ({ route }) => {
   const [selectedComponent, setSelectedComponent] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
 
-  // Obtener componentes desde supabase
+
   const fetchComponents = async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
         .from('components')
         .select('*')
-        .eq('category', categoryTitle); // Filtrar por categoría seleccionada
+        .eq('category', categoryTitle); 
       console.log('Category Title being used: ', categoryTitle);
 
       if (error) throw error;
@@ -37,7 +37,7 @@ const BuildPageList = ({ route }) => {
   }, [categoryTitle]);
 
   const handleAddComponent = (component) => {
-    navigation.goBack(); // Regresar a BuildPage
+    navigation.goBack(); 
     route.params?.onSelectComponent?.(component);
   };
 
@@ -91,7 +91,7 @@ const BuildPageList = ({ route }) => {
         />
       </View>
 
-      {/* Modal para mostrar detalles del componente */}
+
       <Modal
         animationType="slide"
         transparent={true}

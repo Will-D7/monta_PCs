@@ -8,11 +8,10 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
 
   const handleLogin = () => {
-    // Simulación de validación de usuario
     if (email === 'admin@example.com' && password === 'admin123') {
-      navigation.navigate('AdminInicio'); // Redirige a la vista de administrador
+      navigation.navigate('AdminInicio'); 
     } else {
-      navigation.navigate('Home'); // Redirige a la vista de cliente
+      navigation.navigate('Home'); 
     }
   };
 
@@ -38,7 +37,7 @@ export default function LoginScreen() {
           onChangeText={setPassword}
         />
 
-        {/* Botón de iniciar sesión que ejecuta handleLogin */}
+       
         <TouchableOpacity 
           style={styles.button}
           onPress={handleLogin}
@@ -46,7 +45,7 @@ export default function LoginScreen() {
           <Text style={styles.buttonText}>INICIAR SESIÓN</Text>
         </TouchableOpacity>
 
-        {/* Botón para redirigir a la pantalla de registro */}
+       
         <TouchableOpacity onPress={() => navigation.navigate('Register')}>
           <Text style={styles.link}>¿No tienes cuenta? Crear cuenta</Text>
         </TouchableOpacity>
@@ -64,7 +63,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     padding: 20,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)', // Fondo semi-transparente
+    backgroundColor: 'rgba(0, 0, 0, 0.4)', 
   },
   title: {
     fontSize: 24,
