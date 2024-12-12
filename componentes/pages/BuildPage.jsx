@@ -139,12 +139,16 @@ const BuildPage = () => {
               <TouchableOpacity
                 style={styles.addButton}
                // onPress={() => navigation.navigate('BuildPageList', { categoryTitle: category, onSelectComponent:(component)=>{setSelectedComponent(component)} })}
-               onPress={() => navigation.navigate('BuildPageList', { categoryTitle: category, onSelectComponent: (component) => {
-                setSelectedComponents((prevState) => ({
-                  ...prevState,
-                  [category]: component,
-                }));
-              }})}
+                onPress={() => navigation.navigate('BuildPageList', { 
+                categoryTitle: category, 
+                selectedMotherboard: selectedComponents['Placa Madre'], // Pasa la placa madre seleccionada
+                onSelectComponent: (component) => {
+                  setSelectedComponents((prevState) => ({
+                    ...prevState,
+                    [category]: component,
+                  }));
+                }
+              })}
               >
                 <Text style={styles.addButtonText}>+ Añadir</Text>
               </TouchableOpacity>

@@ -2,10 +2,16 @@ import React, { useState, useEffect} from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, ActivityIndicator, Modal, Button } from 'react-native';
 import NavigationBar from '../NavigationBar';
 import { supabase } from '../../src/services/supabaseClient';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { 
+  obtenerRAMCompatible, 
+  obtenerProcesadoresCompatibles, 
+  obtenerDiscosCompatibles 
+} from '../../src/services/filterComponents';
 
-const BuildPageList = ({ route }) => {
-  const { categoryTitle } = route?.params || {};
+const BuildPageList = () => {
+  const route = useRoute();
+  const { categoryTitle, selectedMotherboard } = route?.params || {};
   const navigation = useNavigation();
   const [components, setComponents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,28 +19,48 @@ const BuildPageList = ({ route }) => {
   const [selectedComponent, setSelectedComponent] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
 
-  
-  
   const fetchComponents = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('componente') 
-        .select('id_componente, nombre, descripcion, atributos, imagenurl, precio') // Seleccionamos los campos necesarios
-        .eq('tipo', categoryTitle); 
-  
-      if (error) throw error;
-  
-      // Mapeamos los datos para facilitar su uso en el renderizado
-      const formattedData = data.map((item) => ({
-        id: item.id_componente,
-        name: item.nombre,
-        description: item.descripcion,
-        price: item.precio,
-        imgURL: item.imagenurl,
-      }));
-  
-      setComponents(formattedData || []);
+
+      // Si es una categoría que requiere filtrado y ya hay placa madre
+      const filterMap = {
+        "RAM": () => obtenerRAMCompatible(selectedMotherboard.id),
+        "Procesador": () => obtenerProcesadoresCompatibles(selectedMotherboard.id),
+        "Almacenamiento": () => obtenerDiscosCompatibles(selectedMotherboard.id)
+      };
+
+      let data = [];
+      if (selectedMotherboard && filterMap[categoryTitle]) {
+        data = await filterMap[categoryTitle]();
+        
+        // Mapear los resultados filtrados al formato esperado
+        data = data.map(item => ({
+          id: item.id_ram || item.id_procesador || item.id_disco,
+          name: item.nombre,
+          description: `${item.tipo || ''} ${item.capacidad || item.socket || ''}`,
+          price: item.precio || 0,
+          imgURL: '' // Podrías agregar URL de imagen si está disponible
+        }));
+      } else {
+        // Si no hay filtro especial, busca todos los componentes de esa categoría
+        const response = await supabase
+          .from('componente') 
+          .select('id_componente, nombre, descripcion, precio, imagenurl')
+          .eq('tipo', categoryTitle);
+
+        if (response.error) throw response.error;
+
+        data = response.data.map((item) => ({
+          id: item.id_componente,
+          name: item.nombre,
+          description: item.descripcion,
+          price: item.precio,
+          imgURL: item.imagenurl,
+        }));
+      }
+
+      setComponents(data || []);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -42,19 +68,18 @@ const BuildPageList = ({ route }) => {
     }
   };
   
-
   useEffect(() => {
     fetchComponents();
-  },[categoryTitle]);
+  }, [categoryTitle, selectedMotherboard]);
 
   const handleAddComponent = (component) => {
     navigation.goBack(); // Regresar a BuildPage
     route.params?.onSelectComponent?.({
-      id: component.id, // id del componente
-      name: component.name, // nombre del componente
-      price: component.price, // precio del componente
-      description: component.description, // descripción
-      imgURL: component.imgURL, // URL de la imagen
+      id: component.id, 
+      name: component.name, 
+      price: component.price, 
+      description: component.description, 
+      imgURL: component.imgURL,
     });
   };
   
