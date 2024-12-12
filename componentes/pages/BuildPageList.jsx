@@ -22,14 +22,14 @@ const BuildPageList = () => {
   const fetchComponents = async () => {
     try {
       setLoading(true);
-
+  
       // Si es una categoría que requiere filtrado y ya hay placa madre
       const filterMap = {
         "RAM": () => obtenerRAMCompatible(selectedMotherboard.id),
         "Procesador": () => obtenerProcesadoresCompatibles(selectedMotherboard.id),
         "Almacenamiento": () => obtenerDiscosCompatibles(selectedMotherboard.id)
       };
-
+  
       let data = [];
       if (selectedMotherboard && filterMap[categoryTitle]) {
         data = await filterMap[categoryTitle]();
@@ -39,8 +39,8 @@ const BuildPageList = () => {
           id: item.id_ram || item.id_procesador || item.id_disco,
           name: item.nombre,
           description: `${item.tipo || ''} ${item.capacidad || item.socket || ''}`,
-          price: item.precio || 0,
-          imgURL: '' // Podrías agregar URL de imagen si está disponible
+          price: item.price || 0,  // Cambio aquí: usa item.price en lugar de item.precio
+          imgURL: item.imgURL || ''  // Cambio aquí: usa item.imgURL en lugar de dejar un string vacío
         }));
       } else {
         // Si no hay filtro especial, busca todos los componentes de esa categoría
@@ -48,9 +48,9 @@ const BuildPageList = () => {
           .from('componente') 
           .select('id_componente, nombre, descripcion, precio, imagenurl')
           .eq('tipo', categoryTitle);
-
+  
         if (response.error) throw response.error;
-
+  
         data = response.data.map((item) => ({
           id: item.id_componente,
           name: item.nombre,
@@ -59,7 +59,7 @@ const BuildPageList = () => {
           imgURL: item.imagenurl,
         }));
       }
-
+  
       setComponents(data || []);
     } catch (err) {
       setError(err.message);

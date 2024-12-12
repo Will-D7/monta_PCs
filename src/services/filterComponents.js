@@ -3,7 +3,6 @@ import { supabase } from "./supabaseClient";
 // Filtrar RAM compatible con una Placa Madre
 export async function obtenerRAMCompatible(idPlaca) {
   try {
-    // Obtenemos todas las RAM compatibles para la placa
     const { data: ramPlacaData, error: ramPlacaError } = await supabase
       .from("ram_placa")
       .select("id_ram")
@@ -13,18 +12,35 @@ export async function obtenerRAMCompatible(idPlaca) {
 
     const idsRAMCompatibles = ramPlacaData.map((ram) => ram.id_ram);
 
-    // Obtenemos los detalles de las RAM compatibles
     const { data, error } = await supabase
       .from("ram")
-      .select("id_ram, nombre, tipo, capacidad, frecuencia")
+      .select(`
+        id_ram, 
+        nombre, 
+        tipo, 
+        capacidad, 
+        frecuencia, 
+        componente (
+          imagenurl,
+          precio 
+        )
+      `)
       .in("id_ram", idsRAMCompatibles);
 
     if (error) throw new Error("Error al obtener RAM compatibles: " + error.message);
 
-    return data;
+    return data.map(item => ({
+      id_ram: item.id_ram,
+      nombre: item.nombre,
+      tipo: item.tipo,
+      capacidad: item.capacidad,
+      frecuencia: item.frecuencia,
+      imgURL: item.componente?.imagenurl || '',
+      price: item.componente?.precio || 0,
+    }));
   } catch (err) {
-    console.error(err.message);
-    throw err;
+    console.error(err);
+    return [];
   }
 }
 
@@ -46,12 +62,32 @@ export async function obtenerProcesadoresCompatibles(idPlaca) {
     // Filtramos procesadores con socket compatible
     const { data, error } = await supabase
       .from("procesador")
-      .select("id_procesador, nombre, socket, nucleos, velocidad_base, velocidad_max")
+      .select(`
+        id_procesador, 
+        nombre, 
+        socket, 
+        nucleos, 
+        velocidad_base, 
+        velocidad_max,
+        componente (
+          imagenurl,
+          precio
+        )
+      `)
       .eq("socket", socketPlaca);
 
     if (error) throw new Error("Error al obtener procesadores compatibles: " + error.message);
 
-    return data;
+    return data.map(item => ({
+      id_procesador: item.id_procesador,
+      nombre: item.nombre,
+      socket: item.socket,
+      nucleos: item.nucleos,
+      velocidad_base: item.velocidad_base,
+      velocidad_max: item.velocidad_max,
+      imgURL: item.componente?.imagenurl || '',
+      price: item.componente?.precio || 0,
+    }));
   } catch (err) {
     console.error(err.message);
     throw err;
@@ -74,12 +110,30 @@ export async function obtenerDiscosCompatibles(idPlaca) {
     // Obtenemos los detalles de los discos compatibles
     const { data, error } = await supabase
       .from("disco")
-      .select("id_disco, nombre, tipo, capacidad, puerto_d")
+      .select(`
+        id_disco, 
+        nombre, 
+        tipo, 
+        capacidad, 
+        puerto_d,
+        componente (
+          imagenurl,
+          precio
+        )
+      `)
       .in("id_disco", idsDiscosCompatibles);
 
     if (error) throw new Error("Error al obtener discos compatibles: " + error.message);
 
-    return data;
+    return data.map(item => ({
+      id_disco: item.id_disco,
+      nombre: item.nombre,
+      tipo: item.tipo,
+      capacidad: item.capacidad,
+      puerto_d: item.puerto_d,
+      imgURL: item.componente?.imagenurl || '',
+      price: item.componente?.precio || 0,
+    }));
   } catch (err) {
     console.error(err.message);
     throw err;
