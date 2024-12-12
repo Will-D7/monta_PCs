@@ -1,9 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ImageBackground } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 export default function LoginScreen() {
   const navigation = useNavigation();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleLogin = () => {
+    // Simulación de validación de usuario
+    if (email === 'admin@example.com' && password === 'admin123') {
+      navigation.navigate('AdminInicio'); // Redirige a la vista de administrador
+    } else {
+      navigation.navigate('Home'); // Redirige a la vista de cliente
+    }
+  };
 
   return (
     <ImageBackground 
@@ -13,13 +24,24 @@ export default function LoginScreen() {
       <View style={styles.container}>
         <Text style={styles.title}>BIENVENIDO!</Text>
 
-        <TextInput placeholder="Correo electrónico" style={styles.input} />
-        <TextInput placeholder="Contraseña" style={styles.input} secureTextEntry />
+        <TextInput 
+          placeholder="Correo electrónico" 
+          style={styles.input} 
+          value={email}
+          onChangeText={setEmail}
+        />
+        <TextInput 
+          placeholder="Contraseña" 
+          style={styles.input} 
+          secureTextEntry 
+          value={password}
+          onChangeText={setPassword}
+        />
 
-        {/* Botón de iniciar sesión que redirige directamente a HomePage */}
+        {/* Botón de iniciar sesión que ejecuta handleLogin */}
         <TouchableOpacity 
           style={styles.button}
-          onPress={() => navigation.navigate('HomePage')}
+          onPress={handleLogin}
         >
           <Text style={styles.buttonText}>INICIAR SESIÓN</Text>
         </TouchableOpacity>

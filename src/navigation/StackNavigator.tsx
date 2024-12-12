@@ -7,6 +7,7 @@ import BuildPage from '../../componentes/pages/BuildPage';
 import UserPage from '../../componentes/pages/UserPage';
 import NewComponentForm from '../../componentes/NewComponentForm';
 import BuildPageList from '../../componentes/pages/BuildPageList';
+import AdminInicio from '../../componentes/pages/Administrador/Inicio';
 
 const Stack = createStackNavigator();
 
@@ -23,6 +24,7 @@ export default function StackNavigator() {
       <Stack.Screen name="BuildPageList" component={BuildPageList} />
       <Stack.Screen name="UserPage" component={UserPage} />
       <Stack.Screen name="NewComponentForm" component={NewComponentForm} />
+      <Stack.Screen name="AdminInicio" component={AdminInicio} />
     </Stack.Navigator>
   );
 }
