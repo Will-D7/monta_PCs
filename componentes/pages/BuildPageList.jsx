@@ -83,25 +83,6 @@ const BuildPageList = () => {
         }));
       }
     
-      // Si no hay datos filtrados, mostrar todos los componentes
-      if (data.length === 0 && categoryTitle) {
-        console.log("No se encontraron componentes filtrados. Mostrando todos los componentes de la categoría.");
-        const response = await supabase
-          .from('componente') 
-          .select('id_componente, nombre, descripcion, precio, imagenurl')
-          .eq('tipo', categoryTitle);
-    
-        if (response.error) throw response.error;
-    
-        data = response.data.map((item) => ({
-          id: item.id_componente,
-          name: item.nombre,
-          description: item.descripcion,
-          price: item.precio,
-          imgURL: item.imagenurl,
-        }));
-      }
-    
       setComponents(data || []);
     } catch (err) {
       console.error("Error completo:", err);
@@ -110,9 +91,8 @@ const BuildPageList = () => {
       setLoading(false);
     }
   };
+
   useEffect(() => {
-    console.log("Motherboard seleccionada:", selectedMotherboard);
-    console.log("ID de motherboard:", selectedMotherboard?.id);
     fetchComponents();
   }, [categoryTitle, selectedMotherboard]);
 
@@ -126,7 +106,7 @@ const BuildPageList = () => {
       imgURL: component.imgURL,
     });
   };
-  
+
   const handleImagePress = (component) => {
     setSelectedComponent(component);
     setModalVisible(true);
@@ -140,7 +120,7 @@ const BuildPageList = () => {
       <View style={styles.infoContainer}>
         <Text style={styles.name}>{item.name}</Text>
         <Text style={styles.price}>${item.price}</Text>
-        <Text style={styles.price}>${item.description}</Text>
+        <Text style={styles.price}>{item.description}</Text>
         <TouchableOpacity
           style={styles.addButton}
           onPress={() => handleAddComponent(item)}
@@ -325,24 +305,25 @@ const styles = StyleSheet.create({
   },
   price: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#4a3b8f',
+    color: '#333',
   },
   addButton: {
-    marginTop: 5,
-    backgroundColor: '#e0e0e0',
-    padding: 8,
+    backgroundColor: '#4a3b8f',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
     borderRadius: 5,
-    alignItems: 'center',
+    marginTop: 10,
   },
   addButtonText: {
-    color: '#333',
-    fontWeight: 'bold',
+    color: '#fff',
+    fontSize: 16,
+    textAlign: 'center',
   },
   errorText: {
     color: 'red',
-    fontSize: 16,
     textAlign: 'center',
+    marginTop: 20,
+    fontSize: 18,
   },
 });
 
