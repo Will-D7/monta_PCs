@@ -1,9 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ImageBackground } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 export default function LoginScreen() {
   const navigation = useNavigation();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleLogin = () => {
+    if (email === 'admin@example.com' && password === 'admin123') {
+      navigation.navigate('AdminInicio'); 
+    } else {
+      navigation.navigate('Home'); 
+    }
+  };
 
   return (
     <ImageBackground 
@@ -13,18 +23,29 @@ export default function LoginScreen() {
       <View style={styles.container}>
         <Text style={styles.title}>BIENVENIDO!</Text>
 
-        <TextInput placeholder="Correo electrónico" style={styles.input} />
-        <TextInput placeholder="Contraseña" style={styles.input} secureTextEntry />
+        <TextInput 
+          placeholder="Correo electrónico" 
+          style={styles.input} 
+          value={email}
+          onChangeText={setEmail}
+        />
+        <TextInput 
+          placeholder="Contraseña" 
+          style={styles.input} 
+          secureTextEntry 
+          value={password}
+          onChangeText={setPassword}
+        />
 
-        {/* Botón de iniciar sesión que redirige directamente a HomePage */}
+       
         <TouchableOpacity 
           style={styles.button}
-          onPress={() => navigation.navigate('HomePage')}
+          onPress={handleLogin}
         >
           <Text style={styles.buttonText}>INICIAR SESIÓN</Text>
         </TouchableOpacity>
 
-        {/* Botón para redirigir a la pantalla de registro */}
+       
         <TouchableOpacity onPress={() => navigation.navigate('Register')}>
           <Text style={styles.link}>¿No tienes cuenta? Crear cuenta</Text>
         </TouchableOpacity>
@@ -42,7 +63,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     padding: 20,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)', // Fondo semi-transparente
+    backgroundColor: 'rgba(0, 0, 0, 0.4)', 
   },
   title: {
     fontSize: 24,
