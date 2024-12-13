@@ -47,21 +47,31 @@ export async function obtenerRAMCompatible(idPlaca) {
 // Filtrar Procesadores compatibles con una Placa Madre
 export async function obtenerProcesadoresCompatibles(idPlaca) {
   try {
-    // Obtenemos el socket de la placa seleccionada
+    console.log(`Buscando procesadores para la placa con ID: ${idPlaca}`);
+
+    // Validar que idPlaca no sea null o undefined
+    if (!idPlaca) {
+      console.error("ID de placa es null o undefined");
+      return [];
+    }
+
+    // Primero, obtener información detallada de la placa madre
     const { data: placaData, error: placaError } = await supabase
-      .from("placa_madre")
-      .select("socket")
-      .eq("id_placa", idPlaca)
+      .from('placa_madre')
+      .select('socket')
+      .eq('id_placa', idPlaca)
       .single();
 
-    if (placaError) throw new Error("Error al obtener el socket de la placa: " + placaError.message);
+    if (placaError) {
+      console.error("Error al obtener detalles de la placa:", placaError);
+      return [];
+    }
 
-    const socketPlaca = placaData?.socket;
-    if (!socketPlaca) throw new Error("El socket de la placa no está definido");
+    console.log("Socket de la placa madre:", placaData.socket);
 
-    // Filtramos procesadores con socket compatible
+    // Buscar procesadores compatibles por socket
     const { data, error } = await supabase
-      .from("procesador")
+      .from('procesador')
       .select(`
         id_procesador, 
         nombre, 
@@ -74,11 +84,21 @@ export async function obtenerProcesadoresCompatibles(idPlaca) {
           precio
         )
       `)
-      .eq("socket", socketPlaca);
+      .eq('socket', placaData.socket);
 
-    if (error) throw new Error("Error al obtener procesadores compatibles: " + error.message);
+    console.log("Procesadores encontrados:", data);
+    console.log("Error al buscar procesadores:", error);
 
-    return data.map(item => ({
+    if (error) throw error;
+
+    // Verificar si hay datos
+    if (!data || data.length === 0) {
+      console.log(`No se encontraron procesadores para el socket ${placaData.socket}`);
+      return [];
+    }
+
+    // Mapear los resultados
+    const procesadores = data.map(item => ({
       id_procesador: item.id_procesador,
       nombre: item.nombre,
       socket: item.socket,
@@ -88,9 +108,13 @@ export async function obtenerProcesadoresCompatibles(idPlaca) {
       imgURL: item.componente?.imagenurl || '',
       price: item.componente?.precio || 0,
     }));
+
+    console.log("Procesadores mapeados:", procesadores);
+
+    return procesadores;
   } catch (err) {
-    console.error(err.message);
-    throw err;
+    console.error("Error completo en obtenerProcesadoresCompatibles:", err);
+    return [];
   }
 }
 
