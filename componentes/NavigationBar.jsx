@@ -7,7 +7,7 @@ const NavigationBar = () => {
 
   return (
     <View style={styles.navigation}>
-      <TouchableOpacity onPress={() => navigation.navigate('Home')}>
+      <TouchableOpacity onPress={() => navigation.navigate('HomePage')}>
         <Image source={require('../images/casa.png')} style={styles.iconNav} />
       </TouchableOpacity>
       <TouchableOpacity onPress={() => navigation.navigate('BuildPage')}>

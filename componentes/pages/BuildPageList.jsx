@@ -46,8 +46,10 @@ const BuildPageList = ({ route }) => {
   useEffect(() => {
     fetchComponents();
   },[categoryTitle]);
+  
 
   const handleAddComponent = (component) => {
+    
     navigation.goBack(); // Regresar a BuildPage
     route.params?.onSelectComponent?.({
       id: component.id, // id del componente
@@ -58,6 +60,7 @@ const BuildPageList = ({ route }) => {
     });
   };
   
+
 
   const handleImagePress = (component) => {
     setSelectedComponent(component);

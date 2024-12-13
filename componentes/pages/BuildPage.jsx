@@ -3,18 +3,80 @@ import { View, Text, TextInput, StyleSheet, Image, TouchableOpacity, ScrollView,
 import { Picker } from '@react-native-picker/picker';
 import NavigationBar from '../NavigationBar';
 import { useNavigation, useRoute } from '@react-navigation/native';
-
+import { supabase } from '../../src/services/supabaseClient';
 
 const BuildPage = () => {
   const categories = ["Procesador", "Placa Madre", "RAM", "Tarjeta de Video", "Fuente de alimentación", "Almacenamiento", "Ventiladores", "Case"];
   const route = useRoute();
   const navigation = useNavigation();
-  const [listOptions, setListOptions] = useState(["lista456", "lista7"]);
+  const [listOptions, setListOptions] = useState([]);
   const [selectedList, setSelectedList] = useState("");
   const [isAddingNewList, setIsAddingNewList] = useState(false);
-  const [newListName, setNewListName] = useState("");
+  const [newListName, setNewListName] = useState(""); //nuevo nombre de lista
   const [selectedComponents, setSelectedComponents] = useState({});
   const [totalCost, setTotalCost] = useState(0);
+  const [user, setUser] = useState(null);
+
+
+//////Crear y guardar build en supabase,
+const handleSaveBuild = async () => {
+  try {
+    if (!selectedList) {
+      alert('Selecciona o crea una lista para guardar la build.');
+      return;
+    }
+
+    if (Object.keys(selectedComponents).length === 0) {
+      alert('No has añadido componentes a la build.');
+      return;
+    }
+
+    // Insertar la build en la tabla 'builds' si es nueva
+    let buildId = null;
+
+    // Buscar si existe la build seleccionada
+    const existingBuild = listOptions.find((list) => list.name === selectedList);
+    if (existingBuild) {
+      buildId = existingBuild.id;
+    } else {
+      // Crear una nueva build si no existe
+      const { data: buildData, error: buildError } = await supabase
+        .from('builds')
+        .insert([{ name: selectedList, user_id: user.id }])
+        .select('id')
+        .single();
+
+      if (buildError) throw buildError;
+
+      buildId = buildData.id;
+      setListOptions([...listOptions, { id: buildId, name: selectedList }]);
+    }
+
+    // Preparar componentes para guardar
+    const buildComponents = Object.values(selectedComponents).map((component) => ({
+      build_id: buildId,
+      component_id: component.id,
+      price: component.price,
+    }));
+
+    // Guardar componentes en la tabla 'build_components'
+    const { error: componentsError } = await supabase
+      .from('build_components')
+      .insert(buildComponents);
+
+    if (componentsError) throw componentsError;
+
+    alert('¡Build guardada correctamente!');
+    handleDiscardBuild(); // Limpiar después de guardar
+  } catch (error) {
+    console.error('Error al guardar la build:', error.message);
+    alert('Hubo un problema al guardar la build.');
+  }
+};
+
+/////
+
+
 
   // Función para calcular el costo total
   const calculateTotalCost = () => {
@@ -34,6 +96,40 @@ const BuildPage = () => {
     setTotalCost(0);
   };
   
+//////
+
+
+  // Simulación de usuario autenticado
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    getUser();
+  }, []);
+
+  // Obtener las builds del usuario
+  useEffect(() => {
+    const fetchUserLists = async () => {
+      if (user) {
+        const { data, error } = await supabase
+          .from('builds')
+          .select('id, name')
+          .eq('user_id', user.id);
+        if (error) {
+          console.error('Error fetching user lists:', error.message);
+        } else {
+          setListOptions(data);
+        }
+      }
+    };
+    fetchUserLists();
+  }, [user]);
+
+
+
+
+//////
 
   // Si venimos de BuildPageList con un componente seleccionado
   const componentFromList = route?.params?.selectedComponent;
@@ -70,15 +166,25 @@ const BuildPage = () => {
     }
   };
 
-  const handleAddNewList = () => {
+  const handleAddNewList = async () => {
     if (newListName.trim()) {
-      setListOptions([...listOptions, newListName.trim()]);
-      setSelectedList(newListName.trim());
-      setNewListName("");
-      setIsAddingNewList(false);
-      Keyboard.dismiss();  // Cierra el teclado después de agregar la lista
+      const { data, error } = await supabase
+        .from('builds')
+        .insert([{ name: newListName.trim(), user_id: user.id }])
+        .select('*');
+
+      if (error) {
+        console.error('Error creating new list:', error.message);
+      } else {
+        setListOptions([...listOptions, ...data]);
+        setSelectedList(data[0]?.name || "");
+        setNewListName("");
+        setIsAddingNewList(false);
+        Keyboard.dismiss();
+      }
     }
   };
+
 
   return (
     <View style={styles.container}>
@@ -108,9 +214,10 @@ const BuildPage = () => {
           />
         ) : (
           <Picker selectedValue={selectedList} onValueChange={handleListSelect}>
-            <Picker.Item label="Nombre de nueva lista..." value="nueva" />
-            {listOptions.map((option, index) => (
-              <Picker.Item key={index} label={option} value={option} />
+            <Picker.Item label="Selecciona una lista o crea una nueva" value="" />
+            <Picker.Item label="Nueva lista..." value="nueva" />
+            {listOptions.map((option) => (
+              <Picker.Item key={option.id} label={option.name} value={option.name} />
             ))}
           </Picker>
         )}
@@ -138,7 +245,7 @@ const BuildPage = () => {
             ) : (
               <TouchableOpacity
                 style={styles.addButton}
-               // onPress={() => navigation.navigate('BuildPageList', { categoryTitle: category, onSelectComponent:(component)=>{setSelectedComponent(component)} })}
+              
                onPress={() => navigation.navigate('BuildPageList', { categoryTitle: category, onSelectComponent: (component) => {
                 setSelectedComponents((prevState) => ({
                   ...prevState,
@@ -158,7 +265,7 @@ const BuildPage = () => {
 
           {/* Botones para guardar o descartar la build */}
           <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.saveButton}>
+            <TouchableOpacity style={styles.saveButton} onPress={handleSaveBuild}>
               <Text style={styles.buttonText}>Guardar Build</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.discardButton} onPress={handleDiscardBuild}>

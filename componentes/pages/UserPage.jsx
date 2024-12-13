@@ -8,7 +8,7 @@ const UserPage = ({ route }) => {
 
     return (
         <View style={styles.container}>
-            {/* Encabezado con icono de retroceso y título */}
+        
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
                     <Icon name="arrow-back" size={24} color="#333" />
@@ -16,11 +16,11 @@ const UserPage = ({ route }) => {
                 <Text style={styles.headerText}>Mi Perfil</Text>
             </View>
 
-            {/* Sección principal con información del perfil */}
+        
             <ScrollView contentContainerStyle={styles.profileContent}>
                 <View style={styles.profileContainer}>
                     <Image
-                        source={{ uri: 'https://example.com/user-avatar.png' }} // URL del avatar del usuario
+                        source={{ uri: 'https://example.com/user-avatar.png' }}
                         style={styles.avatar}
                     />
                     <Text style={styles.username}>John Doe</Text>
@@ -29,7 +29,7 @@ const UserPage = ({ route }) => {
                     <Text style={styles.info}>Dirección: 123 Calle Falsa, Ciudad Ejemplo</Text>
                 </View>
 
-                {/* Botones de navegación */}
+         
                 <View style={styles.buttonContainer}>
                     <Button
                         title="Mis Builds Guardadas"
@@ -51,7 +51,7 @@ const UserPage = ({ route }) => {
                 </View>
             </ScrollView>
 
-            {/* Barra de navegación */}
+       
             <NavigationBar />
         </View>
     );
