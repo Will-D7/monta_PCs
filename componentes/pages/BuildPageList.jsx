@@ -21,17 +21,40 @@ const BuildPageList = () => {
 
   const fetchComponents = async () => {
     try {
+      console.log("Categoría:", categoryTitle);
+      console.log("Placa madre seleccionada:", selectedMotherboard);
       setLoading(true);
-  
+      
+      // Variable para almacenar el ID de placa real
+      let idPlacaReal = null;
+      
+      // Intentar obtener el id_placa real
+      if (selectedMotherboard) {
+        const { data: placaData, error: placaError } = await supabase
+          .from('placa_madre')
+          .select('id_placa')
+          .eq('id_componente', selectedMotherboard.id)
+          .single();
+        
+        if (placaError) {
+          console.error("Error al buscar id_placa:", placaError);
+        } else if (placaData) {
+          idPlacaReal = placaData.id_placa;
+          console.log("ID de placa real encontrado:", idPlacaReal);
+        } else {
+          console.error("No se encontró ninguna placa con id_componente", selectedMotherboard.id);
+        }
+      }
+    
       // Si es una categoría que requiere filtrado y ya hay placa madre
       const filterMap = {
-        "RAM": () => obtenerRAMCompatible(selectedMotherboard.id),
-        "Procesador": () => obtenerProcesadoresCompatibles(selectedMotherboard.id),
-        "Almacenamiento": () => obtenerDiscosCompatibles(selectedMotherboard.id)
+        "RAM": () => obtenerRAMCompatible(idPlacaReal),
+        "Procesador": () => obtenerProcesadoresCompatibles(idPlacaReal),
+        "Almacenamiento": () => obtenerDiscosCompatibles(idPlacaReal)
       };
-  
+    
       let data = [];
-      if (selectedMotherboard && filterMap[categoryTitle]) {
+      if (selectedMotherboard && filterMap[categoryTitle] && idPlacaReal) {
         data = await filterMap[categoryTitle]();
         
         // Mapear los resultados filtrados al formato esperado
@@ -39,18 +62,18 @@ const BuildPageList = () => {
           id: item.id_ram || item.id_procesador || item.id_disco,
           name: item.nombre,
           description: `${item.tipo || ''} ${item.capacidad || item.socket || ''}`,
-          price: item.price || 0,  // Cambio aquí: usa item.price en lugar de item.precio
-          imgURL: item.imgURL || ''  // Cambio aquí: usa item.imgURL en lugar de dejar un string vacío
+          price: item.price || 0,
+          imgURL: item.imgURL || ''
         }));
       } else {
-        // Si no hay filtro especial, busca todos los componentes de esa categoría
+        // Si no hay filtro especial o no se encontró id_placa, busca todos los componentes de esa categoría
         const response = await supabase
           .from('componente') 
           .select('id_componente, nombre, descripcion, precio, imagenurl')
           .eq('tipo', categoryTitle);
-  
+    
         if (response.error) throw response.error;
-  
+    
         data = response.data.map((item) => ({
           id: item.id_componente,
           name: item.nombre,
@@ -59,16 +82,37 @@ const BuildPageList = () => {
           imgURL: item.imagenurl,
         }));
       }
-  
+    
+      // Si no hay datos filtrados, mostrar todos los componentes
+      if (data.length === 0 && categoryTitle) {
+        console.log("No se encontraron componentes filtrados. Mostrando todos los componentes de la categoría.");
+        const response = await supabase
+          .from('componente') 
+          .select('id_componente, nombre, descripcion, precio, imagenurl')
+          .eq('tipo', categoryTitle);
+    
+        if (response.error) throw response.error;
+    
+        data = response.data.map((item) => ({
+          id: item.id_componente,
+          name: item.nombre,
+          description: item.descripcion,
+          price: item.precio,
+          imgURL: item.imagenurl,
+        }));
+      }
+    
       setComponents(data || []);
     } catch (err) {
+      console.error("Error completo:", err);
       setError(err.message);
     } finally {
       setLoading(false);
     }
   };
-  
   useEffect(() => {
+    console.log("Motherboard seleccionada:", selectedMotherboard);
+    console.log("ID de motherboard:", selectedMotherboard?.id);
     fetchComponents();
   }, [categoryTitle, selectedMotherboard]);
 
