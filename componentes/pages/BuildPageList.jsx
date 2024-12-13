@@ -2,10 +2,16 @@ import React, { useState, useEffect} from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, ActivityIndicator, Modal, Button } from 'react-native';
 import NavigationBar from '../NavigationBar';
 import { supabase } from '../../src/services/supabaseClient';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { 
+  obtenerRAMCompatible, 
+  obtenerProcesadoresCompatibles, 
+  obtenerDiscosCompatibles 
+} from '../../src/services/filterComponents';
 
-const BuildPageList = ({ route }) => {
-  const { categoryTitle } = route?.params || {};
+const BuildPageList = () => {
+  const route = useRoute();
+  const { categoryTitle, selectedMotherboard } = route?.params || {};
   const navigation = useNavigation();
   const [components, setComponents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,50 +19,112 @@ const BuildPageList = ({ route }) => {
   const [selectedComponent, setSelectedComponent] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
 
-  
-  
   const fetchComponents = async () => {
     try {
+      console.log("Categoría:", categoryTitle);
+      console.log("Placa madre seleccionada:", selectedMotherboard);
       setLoading(true);
-      const { data, error } = await supabase
-        .from('componente') 
-        .select('id_componente, nombre, descripcion, atributos, imagenurl, precio') // Seleccionamos los campos necesarios
-        .eq('tipo', categoryTitle); 
-  
-      if (error) throw error;
-  
-      // Mapeamos los datos para facilitar su uso en el renderizado
-      const formattedData = data.map((item) => ({
-        id: item.id_componente,
-        name: item.nombre,
-        description: item.descripcion,
-        price: item.precio,
-        imgURL: item.imagenurl,
-      }));
-  
-      setComponents(formattedData || []);
+      
+      // Variable para almacenar el ID de placa real
+      let idPlacaReal = null;
+      
+      // Intentar obtener el id_placa real
+      if (selectedMotherboard) {
+        const { data: placaData, error: placaError } = await supabase
+          .from('placa_madre')
+          .select('id_placa')
+          .eq('id_componente', selectedMotherboard.id)
+          .single();
+        
+        if (placaError) {
+          console.error("Error al buscar id_placa:", placaError);
+        } else if (placaData) {
+          idPlacaReal = placaData.id_placa;
+          console.log("ID de placa real encontrado:", idPlacaReal);
+        } else {
+          console.error("No se encontró ninguna placa con id_componente", selectedMotherboard.id);
+        }
+      }
+    
+      // Si es una categoría que requiere filtrado y ya hay placa madre
+      const filterMap = {
+        "RAM": () => obtenerRAMCompatible(idPlacaReal),
+        "Procesador": () => obtenerProcesadoresCompatibles(idPlacaReal),
+        "Almacenamiento": () => obtenerDiscosCompatibles(idPlacaReal)
+      };
+    
+      let data = [];
+      if (selectedMotherboard && filterMap[categoryTitle] && idPlacaReal) {
+        data = await filterMap[categoryTitle]();
+        
+        // Mapear los resultados filtrados al formato esperado
+        data = data.map(item => ({
+          id: item.id_ram || item.id_procesador || item.id_disco,
+          name: item.nombre,
+          description: `${item.tipo || ''} ${item.capacidad || item.socket || ''}`,
+          price: item.price || 0,
+          imgURL: item.imgURL || ''
+        }));
+      } else {
+        // Si no hay filtro especial o no se encontró id_placa, busca todos los componentes de esa categoría
+        const response = await supabase
+          .from('componente') 
+          .select('id_componente, nombre, descripcion, precio, imagenurl')
+          .eq('tipo', categoryTitle);
+    
+        if (response.error) throw response.error;
+    
+        data = response.data.map((item) => ({
+          id: item.id_componente,
+          name: item.nombre,
+          description: item.descripcion,
+          price: item.precio,
+          imgURL: item.imagenurl,
+        }));
+      }
+    
+      // Si no hay datos filtrados, mostrar todos los componentes
+      if (data.length === 0 && categoryTitle) {
+        console.log("No se encontraron componentes filtrados. Mostrando todos los componentes de la categoría.");
+        const response = await supabase
+          .from('componente') 
+          .select('id_componente, nombre, descripcion, precio, imagenurl')
+          .eq('tipo', categoryTitle);
+    
+        if (response.error) throw response.error;
+    
+        data = response.data.map((item) => ({
+          id: item.id_componente,
+          name: item.nombre,
+          description: item.descripcion,
+          price: item.precio,
+          imgURL: item.imagenurl,
+        }));
+      }
+    
+      setComponents(data || []);
     } catch (err) {
+      console.error("Error completo:", err);
       setError(err.message);
     } finally {
       setLoading(false);
     }
   };
-  
-
   useEffect(() => {
+    console.log("Motherboard seleccionada:", selectedMotherboard);
+    console.log("ID de motherboard:", selectedMotherboard?.id);
     fetchComponents();
-  },[categoryTitle]);
-  
+  }, [categoryTitle, selectedMotherboard]);
 
   const handleAddComponent = (component) => {
     
     navigation.goBack(); // Regresar a BuildPage
     route.params?.onSelectComponent?.({
-      id: component.id, // id del componente
-      name: component.name, // nombre del componente
-      price: component.price, // precio del componente
-      description: component.description, // descripción
-      imgURL: component.imgURL, // URL de la imagen
+      id: component.id, 
+      name: component.name, 
+      price: component.price, 
+      description: component.description, 
+      imgURL: component.imgURL,
     });
   };
   

@@ -1,10 +1,16 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ImageBackground } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { View, StyleSheet } from 'react-native';
+import SearchBar from '../../componentes/SearchBar';
+import Categories from '../../componentes/Categories';
+import ContentSection from '../../componentes/ContentSection';
+import NavigationBar from '../../componentes/NavigationBar';
+
+
+const nuevoProducts = [
+  { title: 'MSI MPG B550 Gaming Plus', price: 'E-ATX' },
+];
 
 export default function HomeScreen() {
-  const navigation = useNavigation();
-
   return (
     <ImageBackground 
       source={require('../../assets/1366_2000.jpeg')} 
@@ -21,9 +27,8 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  backgroundImage: { flex: 1, resizeMode: 'cover' },
-  container: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.4)' }, // Fondo semi-transparente
-  title: { fontSize: 24, fontWeight: 'bold', color: '#fff', marginBottom: 20 },
-  button: { backgroundColor: '#4b2a7b', padding: 15, alignItems: 'center', borderRadius: 5 },
-  buttonText: { color: '#fff', fontWeight: 'bold' },
+  container: {
+    flex: 1,
+    backgroundColor: '#eee',
+  },
 });
