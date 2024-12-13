@@ -1,4 +1,4 @@
-import React, { useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, ActivityIndicator, Modal, Button } from 'react-native';
 import NavigationBar from '../NavigationBar';
 import { supabase } from '../../src/services/supabaseClient';
@@ -83,7 +83,6 @@ const BuildPageList = () => {
     });
   };
   
-
   const handleImagePress = (component) => {
     setSelectedComponent(component);
     setModalVisible(true);
@@ -91,12 +90,13 @@ const BuildPageList = () => {
 
   const renderComponent = ({ item }) => (
     <View style={styles.componentContainer}>
-          <TouchableOpacity onPress={() => handleImagePress(item)}>
-            <Image source={{ uri: item.imgURL }} style={styles.image} />
-        </TouchableOpacity>
+      <TouchableOpacity onPress={() => handleImagePress(item)}>
+        <Image source={{ uri: item.imgURL }} style={styles.image} />
+      </TouchableOpacity>
       <View style={styles.infoContainer}>
         <Text style={styles.name}>{item.name}</Text>
         <Text style={styles.price}>${item.price}</Text>
+        <Text style={styles.price}>${item.description}</Text>
         <TouchableOpacity
           style={styles.addButton}
           onPress={() => handleAddComponent(item)}
@@ -106,7 +106,6 @@ const BuildPageList = () => {
       </View>
     </View>
   );
-  
 
   if (loading) {
     return (
@@ -134,26 +133,43 @@ const BuildPageList = () => {
           keyExtractor={(item) => item.id.toString()}
         />
       </View>
+      
       <Modal
-  animationType="slide"
-  transparent={true}
-  visible={modalVisible}
-  onRequestClose={() => setModalVisible(false)}
->
-  <View style={styles.modalContainer}>
-    <View style={styles.modalContent}>
-      {selectedComponent && (
-        <>
-          <Image source={{ uri: selectedComponent.imgURL }} style={styles.modalImage} />
-          <Text style={styles.modalName}>{selectedComponent.name}</Text>
-          <Text style={styles.modalPrice}>${selectedComponent.price}</Text>
-          <Text style={styles.modalDescription}>{selectedComponent.description}</Text>
-        </>
-      )}
-      <Button title="Cerrar" onPress={() => setModalVisible(false)} color="#6200EE" />
-    </View>
-  </View>
-</Modal>
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            {selectedComponent && (
+              <>
+                <Image source={{ uri: selectedComponent.imgURL }} style={styles.modalImage} />
+                <Text style={styles.modalName}>{selectedComponent.name}</Text>
+                <Text style={styles.modalPrice}>${selectedComponent.price}</Text>
+
+                {/* Tabla con datos estáticos */}
+                <View style={styles.table}>
+                  <Text style={styles.tableDescription}>Características principales del componente:</Text>
+                  <View style={styles.tableRow}>
+                    <Text style={styles.tableCellKey}>Fabricante:</Text>
+                    <Text style={styles.tableCellValue}>Intel</Text>
+                  </View>
+                  <View style={styles.tableRow}>
+                    <Text style={styles.tableCellKey}>Modelo:</Text>
+                    <Text style={styles.tableCellValue}>Core i7-12700K</Text>
+                  </View>
+                  <View style={styles.tableRow}>
+                    <Text style={styles.tableCellKey}>Velocidad:</Text>
+                    <Text style={styles.tableCellValue}>3.6 GHz</Text>
+                  </View>
+                </View>
+              </>
+            )}
+            <Button title="Cerrar" onPress={() => setModalVisible(false)} color="#6200EE" />
+          </View>
+        </View>
+      </Modal>
 
       <NavigationBar />
     </View>
@@ -199,12 +215,35 @@ const styles = StyleSheet.create({
     color: '#4a3b8f',
     marginBottom: 8,
   },
-  modalDescription: {
+  table: {
+    width: '100%',
+    marginVertical: 16,
+  },
+  tableDescription: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  tableRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+  },
+  tableCellKey: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+    flex: 1,
+  },
+  tableCellValue: {
     fontSize: 16,
     color: '#666',
-    marginBottom: 16,
-    textAlign: 'center',
-  },  
+    flex: 1,
+    textAlign: 'right',
+  },
   content: {
     flex: 1,
     paddingTop: 20,
@@ -259,46 +298,6 @@ const styles = StyleSheet.create({
   errorText: {
     color: 'red',
     fontSize: 16,
-    textAlign: 'center',
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    width: '80%',
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 20,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  modalImage: {
-    width: 150,
-    height: 150,
-    borderRadius: 10,
-    marginBottom: 16,
-  },
-  modalName: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  modalPrice: {
-    fontSize: 18,
-    color: '#4a3b8f',
-    marginBottom: 8,
-  },
-  modalDescription: {
-    fontSize: 16,
-    color: '#666',
-    marginBottom: 16,
     textAlign: 'center',
   },
 });
