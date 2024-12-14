@@ -13,8 +13,8 @@ export default function AdminInicio({ navigation }) {
           style={[styles.card, styles.productCard]}
           onPress={() => navigation.navigate('GestionProductos')}
         >
-          <Text style={styles.cardTitle}>Gestionar Productos</Text>
-          <Text style={styles.cardDescription}>Añadir, editar o eliminar productos.</Text>
+          <Text style={styles.cardTitle}>Gestionar Componentes</Text>
+          <Text style={styles.cardDescription}>Añadir, editar o eliminar Componentes.</Text>
         </TouchableOpacity>
 
    

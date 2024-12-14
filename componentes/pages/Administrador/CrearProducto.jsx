@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { Picker } from '@react-native-picker/picker'; // Importar Picker
 
 const CrearProducto = () => {
   const navigation = useNavigation();
@@ -11,6 +12,8 @@ const CrearProducto = () => {
     precio: '',
     consumo: '',
   });
+
+  const categories = ["Procesador", "Placa Madre", "RAM", "GPU", "Fuente Poder", "Disco", "Ventilador", "Gabinete"];
 
   const handleCreate = () => {
     if (!producto.tipo || !producto.nombre || !producto.precio) {
@@ -30,12 +33,18 @@ const CrearProducto = () => {
     <View style={styles.container}>
       <Text style={styles.title}>Crear Nuevo Producto</Text>
       
-      <TextInput
+      {/* Selector de tipo de producto */}
+      <Picker
+        selectedValue={producto.tipo}
         style={styles.input}
-        placeholder="Tipo"
-        value={producto.tipo}
-        onChangeText={(text) => setProducto({ ...producto, tipo: text })}
-      />
+        onValueChange={(itemValue) => setProducto({ ...producto, tipo: itemValue })}
+      >
+        <Picker.Item label="Seleccione el tipo" value="" />
+        {categories.map((category, index) => (
+          <Picker.Item key={index} label={category} value={category} />
+        ))}
+      </Picker>
+
       <TextInput
         style={styles.input}
         placeholder="Nombre"

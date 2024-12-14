@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import Ionicons from 'react-native-vector-icons/Ionicons'; // Importamos el ícono
+import Ionicons from 'react-native-vector-icons/Ionicons'; 
 
 const GestionProductos = () => {
   const navigation = useNavigation();
@@ -38,12 +38,12 @@ const GestionProductos = () => {
 
   return (
     <View style={styles.container}>
-      {/* Botón de flecha para retroceder */}
+  
       <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
         <Ionicons name="arrow-back" size={30} color="#4b2a7b" />
       </TouchableOpacity>
 
-      <Text style={styles.title}>Listado de Productos</Text>
+      <Text style={styles.title}>Listado de Componentes</Text>
       
       <FlatList
         data={productos}
@@ -62,7 +62,7 @@ const GestionProductos = () => {
         style={styles.createButton}
         onPress={() => navigation.navigate('CrearProducto')}
       >
-        <Text style={styles.buttonText}>Crear Producto</Text>
+        <Text style={styles.buttonText}>Crear Componente</Text>
       </TouchableOpacity>
     </View>
   );
@@ -73,11 +73,12 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: '#f8f8f8',
+    paddingVertical:50
   },
   backButton: {
     position: 'absolute',
-    top: 30,
-    left: 20,
+    top: 55,
+    left: 10,
     zIndex: 10,
   },
   title: {
