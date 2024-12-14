@@ -1,14 +1,23 @@
-import { supabase } from './supabaseClient'; 
+import { supabase } from './dependencias';
 export const crearComponenteService = async (componenteData) => {
     try {
-      // Convertir atributos a JSONB
-      const atributosJSONB = componenteData.atributos ? 
-        typeof componenteData.atributos === 'string' 
+  
+      const atributosJSONB = componenteData.atributos 
+        ? (typeof componenteData.atributos === 'string' 
           ? componenteData.atributos 
-          : JSON.stringify(componenteData.atributos) 
+          : JSON.stringify(componenteData.atributos)) 
         : null;
   
-      // Insertar en la tabla Componente
+      console.log('Datos a insertar:', {
+        tipo: componenteData.tipo,
+        nombre: componenteData.nombre,
+        descripcion: componenteData.descripcion || null,
+        precio: componenteData.precio,
+        consumo: componenteData.consumo,
+        atributos: atributosJSONB,
+        imagenURL: componenteData.imagenURL || null
+      });
+  
       const { data, error } = await supabase
         .from('Componente')
         .insert({
@@ -22,11 +31,20 @@ export const crearComponenteService = async (componenteData) => {
         })
         .select();
   
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase Insertion Error:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint,
+          fullError: error
+        });
+        throw new Error(error.message || 'Error al insertar componente');
+      }
   
       return data[0];
     } catch (error) {
-      console.error('Error al crear componente:', error);
+      console.error('Catch Block Error:', error);
       throw error;
     }
   };
