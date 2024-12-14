@@ -234,8 +234,7 @@ removeButtonText: {
   categoryTitle: { fontSize: 16, fontWeight: 'bold', textAlign: 'center' },
   addButton: { backgroundColor: '#e0e0e0', padding: 10, borderRadius: 5 },
   addButtonText: { textAlign: 'center', color: '#333' },
-  removeButton: { backgroundColor: '#f44336', padding: 10, borderRadius: 5, marginTop: 5 },
-  removeButtonText: { textAlign: 'center', color: '#fff' },
+  
   header: {
     flexDirection: 'row',
     alignItems: 'center',
