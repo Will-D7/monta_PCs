@@ -15,9 +15,17 @@ const CrearProducto = () => {
   });
 
   const handleCreate = () => {
-
-    console.log('Producto creado', producto);
-    navigation.goBack(); 
+    if (!producto.tipo || !producto.nombre || !producto.precio) {
+      alert('Por favor, complete los campos obligatorios.');
+      return;
+    }
+  
+    const nuevoProducto = {
+      id: Date.now().toString(), // Generar un ID único
+      ...producto,
+    };
+  
+    navigation.navigate('GestionProductos', { nuevoProducto });
   };
 
   return (

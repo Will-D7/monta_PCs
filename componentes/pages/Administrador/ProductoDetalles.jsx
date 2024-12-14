@@ -1,94 +1,64 @@
-// Detalles del producto (ProductoDetalles.tsx)
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
 const ProductoDetalles = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { productoId } = route.params;
-  
-  const [producto, setProducto] = useState({
-    nombre: '',
-    descripcion: '',
-    precio: '',
-    consumo: '',
-    tipo: '',
-    imagen: null,
-  });
+  const { producto } = route.params;
 
-  useEffect(() => {
-    
-    setProducto({
-      nombre: 'Producto ' + productoId,
-      descripcion: 'Descripción del producto ' + productoId,
-      precio: '100',
-      consumo: '5',
-      tipo: 'Electrónico',
-      imagen: null, 
-    });
-  }, [productoId]);
+  const [productoEditado, setProductoEditado] = useState({ ...producto });
 
   const handleSave = () => {
-
-    console.log('Producto actualizado', producto);
-  };
-
-  const handleDelete = () => {
-
-    console.log('Producto eliminado', productoId);
-    navigation.goBack();
+    console.log('Producto actualizado', productoEditado);
+    navigation.navigate('GestionProductos', { productoActualizado: productoEditado });
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Detalles del Producto</Text>
-      
+    <ScrollView style={styles.container}>
+      <Text style={styles.title}>Editar Producto</Text>
+
       <TextInput
         style={styles.input}
         placeholder="Tipo"
-        value={producto.tipo}
-        onChangeText={(text) => setProducto({ ...producto, tipo: text })}
+        value={productoEditado.tipo}
+        onChangeText={(text) => setProductoEditado({ ...productoEditado, tipo: text })}
       />
       <TextInput
         style={styles.input}
         placeholder="Nombre"
-        value={producto.nombre}
-        onChangeText={(text) => setProducto({ ...producto, nombre: text })}
+        value={productoEditado.nombre}
+        onChangeText={(text) => setProductoEditado({ ...productoEditado, nombre: text })}
       />
       <TextInput
         style={styles.input}
         placeholder="Descripción"
-        value={producto.descripcion}
-        onChangeText={(text) => setProducto({ ...producto, descripcion: text })}
+        value={productoEditado.descripcion}
+        onChangeText={(text) => setProductoEditado({ ...productoEditado, descripcion: text })}
       />
       <TextInput
         style={styles.input}
         placeholder="Precio"
+        value={productoEditado.precio.toString()}
         keyboardType="numeric"
-        value={producto.precio}
-        onChangeText={(text) => setProducto({ ...producto, precio: text })}
+        onChangeText={(text) =>
+          setProductoEditado({ ...productoEditado, precio: parseFloat(text) || 0 })
+        }
       />
       <TextInput
         style={styles.input}
-        placeholder="Consumo"
+        placeholder="Cantidad"
+        value={productoEditado.cantidad.toString()}
         keyboardType="numeric"
-        value={producto.consumo}
-        onChangeText={(text) => setProducto({ ...producto, consumo: text })}
+        onChangeText={(text) =>
+          setProductoEditado({ ...productoEditado, cantidad: parseInt(text) || 0 })
+        }
       />
 
-      <TouchableOpacity style={styles.imageButton}>
-        <Text style={styles.buttonText}>Subir Imagen</Text>
-      </TouchableOpacity>
-
-  
       <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
         <Text style={styles.buttonText}>Guardar Cambios</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
-        <Text style={styles.buttonText}>Eliminar Producto</Text>
-      </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 };
 
@@ -96,40 +66,30 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: '#f8f8f8',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
     color: '#4b2a7b',
+    textAlign: 'center',
   },
   input: {
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#fff',
     borderRadius: 8,
     padding: 15,
-    marginBottom: 15,
     fontSize: 16,
-  },
-  imageButton: {
-    backgroundColor: '#4b2a7b',
-    padding: 15,
-    alignItems: 'center',
-    borderRadius: 8,
-    marginBottom: 20,
+    marginBottom: 15,
+    borderWidth: 1,
+    borderColor: '#ddd',
   },
   saveButton: {
     backgroundColor: '#4b2a7b',
     padding: 15,
     alignItems: 'center',
     borderRadius: 8,
-    marginBottom: 15,
-  },
-  deleteButton: {
-    backgroundColor: '#e74c3c',
-    padding: 15,
-    alignItems: 'center',
-    borderRadius: 8,
+    marginTop: 20,
   },
   buttonText: {
     color: '#fff',

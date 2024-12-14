@@ -31,11 +31,7 @@ const UserPage = ({ route }) => {
 
                 {/* Botones de navegación */}
                 <View style={styles.buttonContainer}>
-                    <Button
-                        title="Mis Builds Guardadas"
-                        onPress={() => navigation.navigate('BuildsList')}
-                        color="#6200EE"
-                    />
+                   
                     <View style={styles.buttonSpacing} />
                     <Button
                         title="Editar Perfil"
@@ -51,7 +47,7 @@ const UserPage = ({ route }) => {
                 </View>
             </ScrollView>
 
-            {/* Barra de navegación */}
+     
             <NavigationBar />
         </View>
     );
