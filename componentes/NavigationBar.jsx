@@ -22,14 +22,26 @@ const NavigationBar = () => {
 
 const styles = StyleSheet.create({
   navigation: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
     flexDirection: 'row',
     justifyContent: 'space-around',
-    paddingVertical: 10,
+    paddingVertical: 15,
     backgroundColor: '#4a3b8f',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 5,
+    zIndex: 10,
   },
   iconNav: {
-    width: 30,
-    height: 30,
+    width: 28,
+    height: 28,
     tintColor: '#fff',
   },
 });

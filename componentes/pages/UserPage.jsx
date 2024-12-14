@@ -70,6 +70,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         borderBottomWidth: 4,
         borderBottomColor: '#E0E0E0',
+        marginVertical:30
     },
     backButton: {
         marginRight: 16,

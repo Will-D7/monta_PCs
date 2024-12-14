@@ -3,6 +3,8 @@ import { View, Text, TextInput, StyleSheet, Image, TouchableOpacity, ScrollView,
 import { Picker } from '@react-native-picker/picker';
 import NavigationBar from '../NavigationBar';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { SearchBar } from 'react-native-screens';
+import Icon from 'react-native-vector-icons/Ionicons'; // Asegúrate de tener Ionicons instalado
 
 
 const BuildPage = () => {
@@ -82,20 +84,20 @@ const BuildPage = () => {
 
   return (
     <View style={styles.container}>
-      {/* Logo y barra de búsqueda */}
-      <View style={styles.header}>
-        <Image source={require('../../images/logo.png')} style={styles.logo} />
-        <TextInput placeholder="Buscar componente, build o distribuidores" style={styles.searchInput} />
-        <Image source={require('../../images/usuario.png')} style={styles.userIcon} />
-      </View>
+ 
+  <View style={styles.header}>
+                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                    <Icon name="arrow-back" size={24} color="#333" />
+                    <SearchBar />
+                </TouchableOpacity>
+                <Text style={styles.headerText}>Builds </Text>
+            </View>
 
-      {/* Sección para generar URL */}
       <View style={styles.shareSection}>
         <Text style={styles.shareText}>¡Comparte la build con tus amigos!</Text>
         <Text style={styles.linkText}>El enlace estará aquí</Text>
       </View>
 
-      {/* Combo box para seleccionar lista */}
       <View style={styles.comboBoxContainer}>
         {isAddingNewList ? (
           <TextInput
@@ -182,6 +184,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f0f0f0',
+    paddingVertical:40,
+    paddingBottom:20
   },
   categoryBox: { padding: 15, backgroundColor: '#fff', marginVertical: 5 },
   categoryTitle: { fontSize: 16, fontWeight: 'bold', textAlign: 'center' },

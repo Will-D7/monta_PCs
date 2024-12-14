@@ -5,17 +5,29 @@ const SearchBar = () => (
   <View style={styles.searchBar}>
     <Image source={require('../images/lupa.png')} style={styles.icon} />
     <TextInput placeholder="Buscar..." style={styles.searchInput} />
-    <Image source={require('../images/campana.png')} style={styles.icon} />
+   
   </View>
 );
 
 const styles = StyleSheet.create({
   searchBar: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 15,
+    marginTop:45,
+    paddingHorizontal: 5,
     paddingVertical: 10,
     backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 5,
+    zIndex: 10,
+    borderRadius: 30,
   },
   icon: {
     width: 20,

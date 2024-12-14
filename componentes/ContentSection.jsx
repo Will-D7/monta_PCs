@@ -3,7 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import Card from './Card';
 
 const ContentSection = ({ title, products }) => (
-  <View>
+  <View style={styles.sectionContainer}>
     <Text style={styles.sectionTitle}>{title}</Text>
     <View style={styles.cardContainer}>
       {products.map((product, index) => (
@@ -14,15 +14,19 @@ const ContentSection = ({ title, products }) => (
 );
 
 const styles = StyleSheet.create({
+  sectionContainer: {
+    marginVertical: 20,
+  },
   sectionTitle: {
-    fontSize: 20,
-    marginVertical: 15,
-    color: '#333',
+    fontSize: 22,
+    marginBottom: 15,
+    color: '#2c3e50',
     fontWeight: 'bold',
   },
   cardContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'space-evenly',
+    flexWrap: 'wrap',
   },
 });
 
