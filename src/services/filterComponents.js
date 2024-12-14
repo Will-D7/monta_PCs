@@ -1,5 +1,40 @@
 import { supabase } from "./supabaseClient";
 
+//Filtrar GPU compatible con una Placa Madre
+export async function obtenerGPUCompatible(idPlaca) {
+  try {
+    const { data: gpuPlacaData, error: gpuPlacaError } = await supabase
+      .from("gpu_placa")
+      .select("id_gpu")
+      .eq("id_placa", idPlaca);
+
+    if (gpuPlacaError) throw new Error("Error al obtener relaciones GPU-Placa: " + gpuPlacaError.message);
+
+    const idsGPUCompatibles = gpuPlacaData.map((gpu) => gpu.id_gpu);
+    const { data, error } = await supabase
+      .from("gpu")
+      .select(`
+        id_gpu,
+        nombre, 
+        version_pcie,
+	memoria,
+        componente (imagenurl, precio)`)
+      .in("id_gpu", idsGPUCompatibles);
+
+    if (error) throw new Error("Error al obtener GPU compatibles: " + error.message);
+        return data.map(item => ({
+          id_gpu: item.id_gpu,
+          nombre: item.nombre,
+          version_pcie: item.version_pcie,
+          memoria: item.memoria,
+          imgURL: item.componente?.imagenurl || '',
+          price: item.componente?.precio || 0,
+        }));
+      } catch (err) {
+        console.error(err);
+        return [];
+      }
+    }
 // Filtrar RAM compatible con una Placa Madre
 export async function obtenerRAMCompatible(idPlaca) {
   try {

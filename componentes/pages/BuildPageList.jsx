@@ -6,6 +6,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { 
   obtenerRAMCompatible, 
   obtenerProcesadoresCompatibles, 
+  obtenerGPUCompatible,
   obtenerDiscosCompatibles 
 } from '../../src/services/filterComponents';
 
@@ -54,7 +55,8 @@ const BuildPageList = () => {
       const filterMap = {
         "RAM": () => obtenerRAMCompatible(idPlacaReal),
         "Procesador": () => obtenerProcesadoresCompatibles(idPlacaReal),
-        "Almacenamiento": () => obtenerDiscosCompatibles(idPlacaReal)
+        "Almacenamiento": () => obtenerDiscosCompatibles(idPlacaReal),
+        "GPU": () => obtenerGPUCompatible(idPlacaReal)
       };
     
       let data = [];
@@ -63,13 +65,13 @@ const BuildPageList = () => {
         
         // Mapear los resultados filtrados al formato esperado
         data = data.map(item => ({
-          id: item.id_ram || item.id_procesador || item.id_disco,
+          id: item.id_ram || item.id_procesador || item.id_disco || item.id_gpu,
           name: item.nombre,
-          description: `${item.tipo || ''} ${item.capacidad || item.socket || ''}`,
+          description: `${item.tipo || item.marca || ''} ${item.capacidad || item.memoria_video || item.socket || ''}`,
           price: item.price || 0,
           imgURL: item.imgURL || ''
         }));
-      } else {
+      }  else {
         // Si no hay filtro especial o no se encontró id_placa, busca todos los componentes de esa categoría
         const databaseCategory = mapCategories[categoryTitle] || categoryTitle;
         const response = await supabase
@@ -116,14 +118,14 @@ const BuildPageList = () => {
       setDetailsLoading(true);
       let details = null;
 
-      // Map category to specific table
+      
       const categoryTableMap = {
         "RAM": "ram",
         "Procesador": "procesador",
         "Almacenamiento": "disco",
         "Fuente Poder": "fuente_poder",
         "Placa Madre": "placa_madre",
-        // Add more categories as needed
+        
       };
 
       const tableName = categoryTableMap[categoryTitle] || 'componente';
