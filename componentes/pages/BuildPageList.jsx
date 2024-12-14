@@ -18,7 +18,8 @@ const BuildPageList = () => {
   const [error, setError] = useState(null);
   const [selectedComponent, setSelectedComponent] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-  
+  const [componentDetails, setComponentDetails] = useState(null);
+  const [detailsLoading, setDetailsLoading] = useState(false);
   const mapCategories = {
     "Fuente Poder": "Fuente_Poder"
   };
@@ -110,9 +111,60 @@ const BuildPageList = () => {
       imgURL: component.imgURL,
     });
   };
+  const fetchComponentDetails = async (componentId, categoryTitle) => {
+    try {
+      setDetailsLoading(true);
+      let details = null;
+
+      // Map category to specific table
+      const categoryTableMap = {
+        "RAM": "ram",
+        "Procesador": "procesador",
+        "Almacenamiento": "disco",
+        "Fuente Poder": "fuente_poder",
+        "Placa Madre": "placa_madre",
+        // Add more categories as needed
+      };
+
+      const tableName = categoryTableMap[categoryTitle] || 'componente';
+
+      if (tableName === 'componente') {
+        // For generic components, fetch from componente table
+        const { data, error } = await supabase
+          .from('componente')
+          .select('*')
+          .eq('id_componente', componentId)
+          .single();
+
+        if (error) throw error;
+        details = data;
+      } else {
+        // For specific component types, fetch from their respective tables
+        const { data, error } = await supabase
+          .from(tableName)
+          .select(`
+            *,
+            componente:id_componente (*)
+          `)
+          .eq('id_componente', componentId)
+          .single();
+
+        if (error) throw error;
+        details = data;
+      }
+
+      setComponentDetails(details);
+    } catch (err) {
+      console.error("Error fetching component details:", err);
+      setError(err.message);
+    } finally {
+      setDetailsLoading(false);
+    }
+  };
 
   const handleImagePress = (component) => {
     setSelectedComponent(component);
+    fetchComponentDetails(component.id, categoryTitle);
     setModalVisible(true);
   };
 
@@ -150,6 +202,56 @@ const BuildPageList = () => {
       </View>
     );
   }
+  const renderModal = () => {
+    if (!selectedComponent) return null;
+
+    return (
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Image source={{ uri: selectedComponent.imgURL }} style={styles.modalImage} />
+            <Text style={styles.modalName}>{selectedComponent.name}</Text>
+            <Text style={styles.modalPrice}>${selectedComponent.price}</Text>
+
+            {detailsLoading ? (
+              <ActivityIndicator size="large" color="#4a3b8f" />
+            ) : componentDetails ? (
+              <View style={styles.table}>
+                <Text style={styles.tableDescription}>Características principales:</Text>
+                
+                {/* Dynamic rendering of component details */}
+                {Object.entries(componentDetails)
+                  .filter(([key, value]) => 
+                    // Exclude certain keys that are not meaningful to display
+                    !['id_componente', 'componente', 'created_at'].includes(key) && 
+                    value !== null && 
+                    value !== undefined
+                  )
+                  .map(([key, value]) => (
+                    <View key={key} style={styles.tableRow}>
+                      <Text style={styles.tableCellKey}>
+                        {key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}:
+                      </Text>
+                      <Text style={styles.tableCellValue}>{String(value)}</Text>
+                    </View>
+                  ))
+                }
+              </View>
+            ) : (
+              <Text style={styles.errorText}>No se encontraron detalles del componente</Text>
+            )}
+            
+            <Button title="Cerrar" onPress={() => setModalVisible(false)} color="#6200EE" />
+          </View>
+        </View>
+      </Modal>
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -162,42 +264,7 @@ const BuildPageList = () => {
         />
       </View>
       
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            {selectedComponent && (
-              <>
-                <Image source={{ uri: selectedComponent.imgURL }} style={styles.modalImage} />
-                <Text style={styles.modalName}>{selectedComponent.name}</Text>
-                <Text style={styles.modalPrice}>${selectedComponent.price}</Text>
-
-                {/* Tabla con datos estáticos */}
-                <View style={styles.table}>
-                  <Text style={styles.tableDescription}>Características principales del componente:</Text>
-                  <View style={styles.tableRow}>
-                    <Text style={styles.tableCellKey}>Fabricante:</Text>
-                    <Text style={styles.tableCellValue}>Intel</Text>
-                  </View>
-                  <View style={styles.tableRow}>
-                    <Text style={styles.tableCellKey}>Modelo:</Text>
-                    <Text style={styles.tableCellValue}>Core i7-12700K</Text>
-                  </View>
-                  <View style={styles.tableRow}>
-                    <Text style={styles.tableCellKey}>Velocidad:</Text>
-                    <Text style={styles.tableCellValue}>3.6 GHz</Text>
-                  </View>
-                </View>
-              </>
-            )}
-            <Button title="Cerrar" onPress={() => setModalVisible(false)} color="#6200EE" />
-          </View>
-        </View>
-      </Modal>
+      {renderModal()}
 
       <NavigationBar />
     </View>

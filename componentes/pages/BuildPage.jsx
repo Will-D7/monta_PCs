@@ -121,42 +121,45 @@ const BuildPage = () => {
       {/* Categorías con botones de "Añadir" */}
       <ScrollView style={styles.componentList}>
       {categories.map((category, index) => (
-          <View key={index} style={styles.categoryBox}>
-            <Text style={styles.categoryTitle}>{category}</Text>
-            {selectedComponents[category] ? (
-              <View>
-                <View>
-                  <Text>{selectedComponents[category].name}</Text>
-                  <Text style={{ fontWeight: 'bold', marginTop: 4 }}>${selectedComponents[category].price}</Text>
-                </View>
+  <View key={index} style={styles.categoryBox}>
+    {/* Mostrar el título de la categoría solo en el contenedor externo */}
+    <Text style={styles.categoryTitle}>{category}</Text>
+    {selectedComponents[category] ? (
+      <View style={styles.centeredComponentDetails}>
+        {/* Mostrar solo los detalles del componente sin repetir el título de la categoría */}
+        <Image 
+          source={{ uri: selectedComponents[category].imgURL }} 
+          style={styles.componentImage} 
+        />
+        <Text style={styles.componentName}>{selectedComponents[category].name}</Text>
+        <Text style={styles.componentPrice}>${selectedComponents[category].price}</Text>
+        <TouchableOpacity
+          style={styles.removeButton}
+          onPress={() => handleRemoveComponent(category)}
+        >
+          <Text style={styles.removeButtonText}>Quitar</Text>
+        </TouchableOpacity>
+      </View>
+    ) : (
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() => navigation.navigate('BuildPageList', { 
+          categoryTitle: category, 
+          selectedMotherboard: selectedComponents['Placa Madre'], 
+          onSelectComponent: (component) => {
+            setSelectedComponents((prevState) => ({
+              ...prevState,
+              [category]: component,
+            }));
+          }
+        })}
+      >
+        <Text style={styles.addButtonText}>+ Añadir</Text>
+      </TouchableOpacity>
+    )}
+  </View>
+))}
 
-                <TouchableOpacity
-                  style={styles.removeButton}
-                  onPress={() => handleRemoveComponent(category)}
-                >
-                  <Text style={styles.removeButtonText}>Quitar</Text>
-                </TouchableOpacity>
-              </View>
-            ) : (
-              <TouchableOpacity
-                style={styles.addButton}
-               // onPress={() => navigation.navigate('BuildPageList', { categoryTitle: category, onSelectComponent:(component)=>{setSelectedComponent(component)} })}
-                onPress={() => navigation.navigate('BuildPageList', { 
-                categoryTitle: category, 
-                selectedMotherboard: selectedComponents['Placa Madre'], // Pasa la placa madre seleccionada
-                onSelectComponent: (component) => {
-                  setSelectedComponents((prevState) => ({
-                    ...prevState,
-                    [category]: component,
-                  }));
-                }
-              })}
-              >
-                <Text style={styles.addButtonText}>+ Añadir</Text>
-              </TouchableOpacity>
-            )}
-          </View>
-        ))}
         {/* Contenedor para el costo total */}
         <View style={styles.totalCostContainer}>
           <Text style={styles.totalCostText}>Costo Total</Text>
@@ -187,6 +190,46 @@ const styles = StyleSheet.create({
     paddingVertical:40,
     paddingBottom:20
   },
+selectedComponentContainer: {
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: 15,
+  backgroundColor: '#fff',
+  marginVertical: 5,
+},
+centeredComponentDetails: {
+  alignItems: 'center',
+  marginBottom: 10,
+},
+componentImage: {
+  width: 100,
+  height: 100,
+  borderRadius: 10,
+  marginBottom: 10,
+},
+componentName: {
+  fontSize: 16,
+  fontWeight: 'bold',
+  textAlign: 'center',
+  marginBottom: 5,
+},
+componentPrice: {
+  fontSize: 16,
+  color: '#4a3b8f',
+  fontWeight: 'bold',
+  marginBottom: 10,
+},
+removeButton: {
+  backgroundColor: '#f44336',
+  padding: 10,
+  borderRadius: 5,
+  alignItems: 'center',
+  width: '100%',
+},
+removeButtonText: {
+  color: '#fff',
+  fontSize: 16,
+},
   categoryBox: { padding: 15, backgroundColor: '#fff', marginVertical: 5 },
   categoryTitle: { fontSize: 16, fontWeight: 'bold', textAlign: 'center' },
   addButton: { backgroundColor: '#e0e0e0', padding: 10, borderRadius: 5 },
@@ -275,6 +318,7 @@ const styles = StyleSheet.create({
   totalCostContainer: {
     backgroundColor: '#fff',
     padding: 15,
+    marginBottom: 70,
     marginVertical: 10,
     borderRadius: 5,
     borderWidth: 1,
