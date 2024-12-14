@@ -1,14 +1,29 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
 import Card from './Card';
 
-const ContentSection = ({ title, products }) => (
+const ContentSection = ({ 
+  title = "Productos", 
+  products = [], 
+  loading = false 
+}) => (
   <View style={styles.sectionContainer}>
     <Text style={styles.sectionTitle}>{title}</Text>
     <View style={styles.cardContainer}>
-      {products.map((product, index) => (
-        <Card key={index} title={product.title} price={product.price} />
-      ))}
+      {loading ? (
+        <ActivityIndicator size="large" color="#0000ff" />
+      ) : products.length > 0 ? (
+        products.map((product, index) => (
+          <Card 
+            key={product.id || index} 
+            title={product.title} 
+            price={product.price} 
+            imageUrl={product.imageUrl}
+          />
+        ))
+      ) : (
+        <Text>No hay productos disponibles</Text>
+      )}
     </View>
   </View>
 );
