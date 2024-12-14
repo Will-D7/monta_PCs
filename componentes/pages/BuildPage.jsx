@@ -351,7 +351,7 @@ removeButtonText: {
   },
   discardButton: {
     flex: 1,
-    backgroundColor: '#c2bae8',
+    backgroundColor: '#f44336',
     padding: 10,
     borderRadius: 5,
     marginHorizontal: 5,
