@@ -1,4 +1,3 @@
-// Crear producto (CrearProducto.tsx)
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -11,7 +10,6 @@ const CrearProducto = () => {
     descripcion: '',
     precio: '',
     consumo: '',
-    imagen: null,
   });
 
   const handleCreate = () => {
@@ -19,12 +17,12 @@ const CrearProducto = () => {
       alert('Por favor, complete los campos obligatorios.');
       return;
     }
-  
+
     const nuevoProducto = {
       id: Date.now().toString(), // Generar un ID único
       ...producto,
     };
-  
+
     navigation.navigate('GestionProductos', { nuevoProducto });
   };
 
@@ -65,10 +63,6 @@ const CrearProducto = () => {
         onChangeText={(text) => setProducto({ ...producto, consumo: text })}
       />
 
-      <TouchableOpacity style={styles.imageButton}>
-        <Text style={styles.buttonText}>Subir Imagen</Text>
-      </TouchableOpacity>
-
       <TouchableOpacity style={styles.createButton} onPress={handleCreate}>
         <Text style={styles.buttonText}>Crear Producto</Text>
       </TouchableOpacity>
@@ -94,13 +88,6 @@ const styles = StyleSheet.create({
     padding: 15,
     marginBottom: 15,
     fontSize: 16,
-  },
-  imageButton: {
-    backgroundColor: '#4b2a7b',
-    padding: 15,
-    alignItems: 'center',
-    borderRadius: 8,
-    marginBottom: 20,
   },
   createButton: {
     backgroundColor: '#4b2a7b',

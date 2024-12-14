@@ -1,7 +1,7 @@
-// Listado de productos (GestionProductos.tsx)
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import Ionicons from 'react-native-vector-icons/Ionicons'; // Importamos el ícono
 
 const GestionProductos = () => {
   const navigation = useNavigation();
@@ -9,7 +9,6 @@ const GestionProductos = () => {
   const [productos, setProductos] = useState([]);
 
   useEffect(() => {
-
     setProductos([
       { id: '1', nombre: 'Mouse Gamer RGB', descripcion: 'Mouse con iluminación RGB personalizable', precio: 35, cantidad: 20, tipo: 'Periférico' },
       { id: '2', nombre: 'Teclado Mecánico', descripcion: 'Teclado con switches mecánicos y retroiluminación', precio: 75, cantidad: 15, tipo: 'Periférico' },
@@ -21,12 +20,9 @@ const GestionProductos = () => {
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
-      // Agregar un nuevo producto
       if (route.params?.nuevoProducto) {
         setProductos((prevProductos) => [route.params.nuevoProducto, ...prevProductos]);
       }
-
-      // Actualizar producto existente
       if (route.params?.productoActualizado) {
         const productoActualizado = route.params.productoActualizado;
         setProductos((prevProductos) =>
@@ -42,6 +38,11 @@ const GestionProductos = () => {
 
   return (
     <View style={styles.container}>
+      {/* Botón de flecha para retroceder */}
+      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+        <Ionicons name="arrow-back" size={30} color="#4b2a7b" />
+      </TouchableOpacity>
+
       <Text style={styles.title}>Listado de Productos</Text>
       
       <FlatList
@@ -72,6 +73,12 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: '#f8f8f8',
+  },
+  backButton: {
+    position: 'absolute',
+    top: 30,
+    left: 20,
+    zIndex: 10,
   },
   title: {
     fontSize: 24,
