@@ -1,22 +1,39 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, Image, TouchableOpacity, ScrollView, Keyboard } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Image, TouchableOpacity, ScrollView, Keyboard, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import NavigationBar from '../NavigationBar';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { SearchBar } from 'react-native-screens';
-import Icon from 'react-native-vector-icons/Ionicons'; // Asegúrate de tener Ionicons instalado
-
+import Icon from 'react-native-vector-icons/Ionicons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const BuildPage = () => {
   const categories = ["Procesador", "Placa Madre", "RAM", "GPU", "Fuente Poder", "Disco", "Ventilador", "Gabinete"];
   const route = useRoute();
   const navigation = useNavigation();
-  const [listOptions, setListOptions] = useState(["lista456", "lista7"]);
+  
+  const [listOptions, setListOptions] = useState([]);
   const [selectedList, setSelectedList] = useState("");
   const [isAddingNewList, setIsAddingNewList] = useState(false);
   const [newListName, setNewListName] = useState("");
   const [selectedComponents, setSelectedComponents] = useState({});
   const [totalCost, setTotalCost] = useState(0);
+
+  // Cargar builds guardadas al montar el componente
+  useEffect(() => {
+    const loadSavedBuilds = async () => {
+      try {
+        const savedBuilds = await AsyncStorage.getItem('savedBuilds');
+        if (savedBuilds) {
+          const parsedBuilds = JSON.parse(savedBuilds);
+          setListOptions(parsedBuilds.map(build => build.name));
+        }
+      } catch (error) {
+        console.error('Error loading saved builds:', error);
+      }
+    };
+    loadSavedBuilds();
+  }, []);
 
   // Función para calcular el costo total
   const calculateTotalCost = () => {
@@ -30,12 +47,12 @@ const BuildPage = () => {
     calculateTotalCost();
   }, [selectedComponents]);
 
-  //Limpiar todos los componentes
+  // Limpiar todos los componentes
   const handleDiscardBuild = () => {
     setSelectedComponents({});
     setTotalCost(0);
+    setSelectedList("");
   };
-  
 
   // Si venimos de BuildPageList con un componente seleccionado
   const componentFromList = route?.params?.selectedComponent;
@@ -52,46 +69,137 @@ const BuildPage = () => {
     });
     navigation.setParams({ selectedComponent: null, categoryTitle: null });
   }
-  
 
-    // Quitar componente seleccionado
-    const handleRemoveComponent = (category) => {
-      setSelectedComponents((prevState) => {
-        const newState = { ...prevState };
-        delete newState[category];
-        return newState;
-      });
-    };
+  // Quitar componente seleccionado
+  const handleRemoveComponent = (category) => {
+    setSelectedComponents((prevState) => {
+      const newState = { ...prevState };
+      delete newState[category];
+      return newState;
+    });
+  };
 
-
-  const handleListSelect = (value) => {
+  // Manejar selección de lista o creación de nueva lista
+  const handleListSelect = async (value) => {
     if (value === "nueva") {
       setIsAddingNewList(true);
+      // Limpiar componentes seleccionados al crear nueva lista
+      setSelectedComponents({});
+      setTotalCost(0);
     } else {
       setSelectedList(value);
+      
+      // Cargar componentes de la build seleccionada
+      try {
+        const savedBuilds = await AsyncStorage.getItem('savedBuilds');
+        if (savedBuilds) {
+          const parsedBuilds = JSON.parse(savedBuilds);
+          const selectedBuild = parsedBuilds.find(build => build.name === value);
+          if (selectedBuild) {
+            // Establecer los componentes de esta build específica
+            setSelectedComponents(selectedBuild.components || {});
+            
+            // Recalcular el costo total basado en los componentes de esta build
+            const total = Object.values(selectedBuild.components || {}).reduce((sum, component) => {
+              return sum + (component.price || 0);
+            }, 0);
+            setTotalCost(total);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading build:', error);
+      }
     }
   };
 
-  const handleAddNewList = () => {
+  // Agregar nueva lista/build
+  const handleAddNewList = async () => {
     if (newListName.trim()) {
-      setListOptions([...listOptions, newListName.trim()]);
-      setSelectedList(newListName.trim());
-      setNewListName("");
-      setIsAddingNewList(false);
-      Keyboard.dismiss();  // Cierra el teclado después de agregar la lista
+      try {
+        // Obtener builds guardadas
+        const savedBuilds = await AsyncStorage.getItem('savedBuilds');
+        const parsedBuilds = savedBuilds ? JSON.parse(savedBuilds) : [];
+
+        // Verificar si ya existe una build con ese nombre
+        const existingBuildIndex = parsedBuilds.findIndex(build => build.name === newListName.trim());
+        
+        if (existingBuildIndex !== -1) {
+          Alert.alert('Error', 'Ya existe una build con este nombre');
+          return;
+        }
+
+        // Guardar nueva build
+        const newBuild = {
+          name: newListName.trim(),
+          components: {} // Inicializar con un objeto de componentes vacío
+        };
+
+        parsedBuilds.push(newBuild);
+        
+        await AsyncStorage.setItem('savedBuilds', JSON.stringify(parsedBuilds));
+        
+        // Actualizar estado
+        setListOptions([...listOptions, newListName.trim()]);
+        setSelectedList(newListName.trim());
+        setSelectedComponents({}); // Limpiar los componentes seleccionados
+        setNewListName("");
+        setIsAddingNewList(false);
+        Keyboard.dismiss();
+      } catch (error) {
+        console.error('Error saving build:', error);
+        Alert.alert('Error', 'No se pudo guardar la build');
+      }
+    }
+  };
+
+  // Guardar build existente
+  const handleSaveBuild = async () => {
+    if (!selectedList) {
+      Alert.alert('Error', 'Selecciona o crea una lista primero');
+      return;
+    }
+
+    try {
+      // Obtener builds guardadas
+      const savedBuilds = await AsyncStorage.getItem('savedBuilds');
+      const parsedBuilds = savedBuilds ? JSON.parse(savedBuilds) : [];
+
+      // Encontrar y actualizar la build
+      const buildIndex = parsedBuilds.findIndex(build => build.name === selectedList);
+      
+      if (buildIndex !== -1) {
+        // Actualizar build existente
+        parsedBuilds[buildIndex] = {
+          name: selectedList,
+          components: selectedComponents
+        };
+      } else {
+        // Crear nueva build si no existe
+        parsedBuilds.push({
+          name: selectedList,
+          components: selectedComponents
+        });
+      }
+
+      // Guardar builds actualizadas
+      await AsyncStorage.setItem('savedBuilds', JSON.stringify(parsedBuilds));
+      
+      Alert.alert('Éxito', 'Build guardada correctamente');
+    } catch (error) {
+      console.error('Error saving build:', error);
+      Alert.alert('Error', 'No se pudo guardar la build');
     }
   };
 
   return (
     <View style={styles.container}>
- 
-  <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                    <Icon name="arrow-back" size={24} color="#333" />
-                    <SearchBar />
-                </TouchableOpacity>
-                <Text style={styles.headerText}>Builds </Text>
-            </View>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Icon name="arrow-back" size={24} color="#333" />
+          <SearchBar />
+        </TouchableOpacity>
+        <Text style={styles.headerText}>Builds </Text>
+      </View>
 
       <View style={styles.shareSection}>
         <Text style={styles.shareText}>¡Comparte la build con tus amigos!</Text>
@@ -120,62 +228,66 @@ const BuildPage = () => {
 
       {/* Categorías con botones de "Añadir" */}
       <ScrollView style={styles.componentList}>
-      {categories.map((category, index) => (
-  <View key={index} style={styles.categoryBox}>
-    {/* Mostrar el título de la categoría solo en el contenedor externo */}
-    <Text style={styles.categoryTitle}>{category}</Text>
-    {selectedComponents[category] ? (
-      <View style={styles.centeredComponentDetails}>
-        {/* Mostrar solo los detalles del componente sin repetir el título de la categoría */}
-        <Image 
-          source={{ uri: selectedComponents[category].imgURL }} 
-          style={styles.componentImage} 
-        />
-        <Text style={styles.componentName}>{selectedComponents[category].name}</Text>
-        <Text style={styles.componentPrice}>${selectedComponents[category].price}</Text>
-        <TouchableOpacity
-          style={styles.removeButton}
-          onPress={() => handleRemoveComponent(category)}
-        >
-          <Text style={styles.removeButtonText}>Quitar</Text>
-        </TouchableOpacity>
-      </View>
-    ) : (
-      <TouchableOpacity
-        style={styles.addButton}
-        onPress={() => navigation.navigate('BuildPageList', { 
-          categoryTitle: category, 
-          selectedMotherboard: selectedComponents['Placa Madre'], 
-          onSelectComponent: (component) => {
-            setSelectedComponents((prevState) => ({
-              ...prevState,
-              [category]: component,
-            }));
-          }
-        })}
-      >
-        <Text style={styles.addButtonText}>+ Añadir</Text>
-      </TouchableOpacity>
-    )}
-  </View>
-))}
+        {categories.map((category, index) => (
+          <View key={index} style={styles.categoryBox}>
+            <Text style={styles.categoryTitle}>{category}</Text>
+            {selectedComponents[category] ? (
+              <View style={styles.centeredComponentDetails}>
+                <Image 
+                  source={{ uri: selectedComponents[category].imgURL }} 
+                  style={styles.componentImage} 
+                />
+                <Text style={styles.componentName}>{selectedComponents[category].name}</Text>
+                <Text style={styles.componentPrice}>${selectedComponents[category].price}</Text>
+                <TouchableOpacity
+                  style={styles.removeButton}
+                  onPress={() => handleRemoveComponent(category)}
+                >
+                  <Text style={styles.removeButtonText}>Quitar</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <TouchableOpacity
+                style={styles.addButton}
+                onPress={() => navigation.navigate('BuildPageList', { 
+                  categoryTitle: category, 
+                  selectedMotherboard: selectedComponents['Placa Madre'], 
+                  onSelectComponent: (component) => {
+                    setSelectedComponents((prevState) => ({
+                      ...prevState,
+                      [category]: component,
+                    }));
+                  }
+                })}
+              >
+                <Text style={styles.addButtonText}>+ Añadir</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        ))}
 
         {/* Contenedor para el costo total */}
         <View style={styles.totalCostContainer}>
           <Text style={styles.totalCostText}>Costo Total</Text>
-          <Text style={styles.totalCostValue}>${totalCost}</Text>
+          <Text style={styles.totalCostValue}>${totalCost.toFixed(2)}</Text>
 
           {/* Botones para guardar o descartar la build */}
           <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.saveButton}>
+            <TouchableOpacity 
+              style={styles.saveButton} 
+              onPress={handleSaveBuild}
+            >
               <Text style={styles.buttonText}>Guardar Build</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.discardButton} onPress={handleDiscardBuild}>
+            <TouchableOpacity 
+              style={styles.discardButton} 
+              onPress={handleDiscardBuild}
+            >
               <Text style={styles.buttonText}>Descartar Build</Text>
             </TouchableOpacity>
           </View>
-  </View>
-    </ScrollView>
+        </View>
+      </ScrollView>
 
       {/* Barra de navegación en la parte inferior */}
       <NavigationBar />
