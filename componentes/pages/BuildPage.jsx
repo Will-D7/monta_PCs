@@ -8,7 +8,7 @@ import Icon from 'react-native-vector-icons/Ionicons'; // Asegúrate de tener Io
 
 
 const BuildPage = () => {
-  const categories = ["Procesador", "Placa Madre", "RAM", "Tarjeta de Video", "Fuente de alimentación", "Almacenamiento", "Ventiladores", "Case"];
+  const categories = ["Procesador", "Placa Madre", "RAM", "GPU", "Fuente Poder", "Disco", "Ventilador", "Gabinete"];
   const route = useRoute();
   const navigation = useNavigation();
   const [listOptions, setListOptions] = useState(["lista456", "lista7"]);

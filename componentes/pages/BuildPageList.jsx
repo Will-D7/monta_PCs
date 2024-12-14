@@ -18,7 +18,10 @@ const BuildPageList = () => {
   const [error, setError] = useState(null);
   const [selectedComponent, setSelectedComponent] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-
+  
+  const mapCategories = {
+    "Fuente Poder": "Fuente_Poder"
+  };
   const fetchComponents = async () => {
     try {
       console.log("Categoría:", categoryTitle);
@@ -67,10 +70,11 @@ const BuildPageList = () => {
         }));
       } else {
         // Si no hay filtro especial o no se encontró id_placa, busca todos los componentes de esa categoría
+        const databaseCategory = mapCategories[categoryTitle] || categoryTitle;
         const response = await supabase
           .from('componente') 
           .select('id_componente, nombre, descripcion, precio, imagenurl')
-          .eq('tipo', categoryTitle);
+          .eq('tipo', databaseCategory);
     
         if (response.error) throw response.error;
     
